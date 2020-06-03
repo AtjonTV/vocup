@@ -21,15 +21,15 @@ namespace Vocup.Models
         public static PracticeState Parse(int practiceStateNumber)
         {
             if (practiceStateNumber < 0)
-                throw new ArgumentOutOfRangeException(nameof(practiceStateNumber), practiceStateNumber, $"{nameof(practiceStateNumber)} must be greater than or equal to 0");
+                throw new ArgumentOutOfRangeException(nameof(practiceStateNumber), practiceStateNumber,
+                    $"{nameof(practiceStateNumber)} must be greater than or equal to 0");
             if (practiceStateNumber == 0)
                 return PracticeState.Unpracticed;
             if (practiceStateNumber == 1)
                 return PracticeState.WronglyPracticed;
             if (practiceStateNumber < Settings.Default.MaxPracticeCount)
                 return PracticeState.CorrectlyPracticed;
-            else // if (practiceStateNumber >= Settings.Default.MaxPracticeCount)
-                return PracticeState.FullyPracticed;
+            return PracticeState.FullyPracticed;
         }
     }
 }

@@ -18,14 +18,14 @@ namespace Vocup.Controls
             set
             {
                 _splitterBaseDistance = value;
-                SplitterDistance = (int)Math.Round( _splitterBaseDistance * scalingFactor.Width);
+                SplitterDistance = (int) Math.Round(_splitterBaseDistance * scalingFactor.Width);
             }
         }
 
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {
             scalingFactor = scalingFactor.Multiply(factor);
-            SplitterDistance = (int)Math.Round(_splitterBaseDistance * scalingFactor.Width);
+            SplitterDistance = (int) Math.Round(_splitterBaseDistance * scalingFactor.Width);
             base.ScaleControl(factor, specified);
         }
     }

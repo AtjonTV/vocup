@@ -10,9 +10,9 @@ namespace Vocup.Forms
     public partial class VocabularyWordDialog : Form
     {
         private const string InvalidChars = "#=";
+        protected readonly VocabularyBook book;
         private readonly Color redBgColor = Color.FromArgb(255, 192, 203);
         private readonly SpecialCharKeyboard specialCharDialog;
-        protected readonly VocabularyBook book;
 
         public VocabularyWordDialog(VocabularyBook book)
         {
@@ -40,14 +40,14 @@ namespace Vocup.Forms
             // Visual feedback for invalid chars.
             TbMotherTongue.BackColor = TbMotherTongue.Text.ContainsAny(InvalidChars) ? redBgColor : Color.White;
             TbForeignLang.BackColor = TbForeignLang.Text.ContainsAny(InvalidChars) ? redBgColor : Color.White;
-            TbForeignLangSynonym.BackColor = TbForeignLangSynonym.Text.ContainsAny(InvalidChars) ? redBgColor : Color.White;
+            TbForeignLangSynonym.BackColor =
+                TbForeignLangSynonym.Text.ContainsAny(InvalidChars) ? redBgColor : Color.White;
 
             OnInputValidated(BtnContinue.Enabled);
         }
 
         protected virtual void OnInputValidated(bool passed)
         {
-
         }
 
         protected virtual bool OnCancel()
@@ -62,17 +62,13 @@ namespace Vocup.Forms
 
         protected bool BookContainsInput(VocabularyWord exclude)
         {
-            foreach (VocabularyWord word in book.Words)
-            {
+            foreach (var word in book.Words)
                 if (!ReferenceEquals(word, exclude) &&
                     word.MotherTongue == TbMotherTongue.Text &&
                     word.ForeignLang == TbForeignLang.Text &&
                     (word.ForeignLangSynonym == TbForeignLangSynonym.Text ||
-                    word.ForeignLangSynonym == null && TbForeignLangSynonym.Text == ""))
-                {
+                     word.ForeignLangSynonym == null && TbForeignLangSynonym.Text == ""))
                     return true;
-                }
-            }
 
             return false;
         }
@@ -87,7 +83,7 @@ namespace Vocup.Forms
 
         private void TextBox_Enter(object sender, EventArgs e)
         {
-            specialCharDialog.RegisterTextBox((TextBox)sender);
+            specialCharDialog.RegisterTextBox((TextBox) sender);
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)

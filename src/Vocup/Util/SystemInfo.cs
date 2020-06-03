@@ -1,8 +1,7 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Management;
+using Microsoft.Win32;
 
 namespace Vocup.Util
 {
@@ -12,14 +11,13 @@ namespace Vocup.Util
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                var name = new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<ManagementObject>()
-                            .Select(x => x.GetPropertyValue("Caption")).FirstOrDefault();
+                var name = new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get()
+                    .Cast<ManagementObject>()
+                    .Select(x => x.GetPropertyValue("Caption")).FirstOrDefault();
                 return name != null ? name.ToString() : "Unknown";
             }
-            else
-            {
-                return "Unknown Linux version";
-            }
+            
+            return "Unknown Linux version";
         }
 
         public static bool TryGetVocupInstallation(out (Version version, string uninstallString) installation)
@@ -27,28 +25,28 @@ namespace Vocup.Util
             installation = (null, null);
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
                 // Vocup is installed as 32bit application
-                using (RegistryKey hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
-                using (RegistryKey vocup = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Vocup_is1", writable: false))
+                using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+                using (var vocup = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Vocup_is1",
+                    false))
                 {
                     if (vocup == null) return false;
-                    string versionString = (string)vocup.GetValue("DisplayVersion");
-                    installation.uninstallString = (string)vocup.GetValue("UninstallString");
+                    var versionString = (string) vocup.GetValue("DisplayVersion");
+                    installation.uninstallString = (string) vocup.GetValue("UninstallString");
                     return Version.TryParse(versionString, out installation.version);
                 }
-            }
-            else return false;
+
+            return false;
         }
 
         public static bool IsWindows10()
         {
             return Environment.OSVersion.Platform == PlatformID.Win32NT &&
-                Environment.OSVersion.Version >= new Version(10, 0);
+                   Environment.OSVersion.Version >= new Version(10, 0);
         }
 
         /// <summary>
-        /// Returns the latest installed version of the .NET Framework.
+        ///     Returns the latest installed version of the .NET Framework.
         /// </summary>
         /// <returns></returns>
         /// <remarks>https://docs.microsoft.com/de-de/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed</remarks>
@@ -58,22 +56,16 @@ namespace Vocup.Util
             {
                 const string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
 
-                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(subkey))
+                using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
+                    .OpenSubKey(subkey))
                 {
                     if (ndpKey != null && ndpKey.GetValue("Release") != null)
-                    {
-                        return ".NET Framework Version: " + CheckFor45PlusVersion((int)ndpKey.GetValue("Release"));
-                    }
-                    else
-                    {
-                        return ".NET Framework Version 4.5 or later is not detected.";
-                    }
+                        return ".NET Framework Version: " + CheckFor45PlusVersion((int) ndpKey.GetValue("Release"));
+                    return ".NET Framework Version 4.5 or later is not detected.";
                 }
             }
-            else
-            {
-                return "Unknown .NET Framework version";
-            }
+
+            return "Unknown .NET Framework version";
         }
 
         // Checking the version using >= will enable forward compatibility.

@@ -9,7 +9,7 @@ namespace Vocup.Util
         private readonly List<Action<T>> onAddActions;
         private readonly List<Action<T>> onRemoveActions;
 
-        public ReactiveCollection() : base()
+        public ReactiveCollection()
         {
             onAddActions = new List<Action<T>>();
             onRemoveActions = new List<Action<T>>();
@@ -17,18 +17,12 @@ namespace Vocup.Util
 
         public void ForEach(Action<T> action)
         {
-            foreach (T item in this)
-            {
-                action(item);
-            }
+            foreach (var item in this) action(item);
         }
 
         public void OnAdd(Action<T> action)
         {
-            foreach (T item in this)
-            {
-                action(item);
-            }
+            foreach (var item in this) action(item);
             onAddActions.Add(action);
         }
 
@@ -40,20 +34,14 @@ namespace Vocup.Util
         protected override void InsertItem(int index, T item)
         {
             base.InsertItem(index, item);
-            foreach (Action<T> action in onAddActions)
-            {
-                action(item);
-            }
+            foreach (var action in onAddActions) action(item);
         }
 
         protected override void RemoveItem(int index)
         {
-            T item = this[index];
+            var item = this[index];
             base.RemoveItem(index);
-            foreach (Action<T> action in onRemoveActions)
-            {
-                action(item);
-            }
+            foreach (var action in onRemoveActions) action(item);
         }
     }
 }

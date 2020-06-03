@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace Vocup.Models
 {
     public class VocabularyWordController
     {
-        private readonly ListViewItem.ListViewSubItem motherTongueColumn;
         private readonly ListViewItem.ListViewSubItem foreignLangColumn;
+        private readonly ListViewItem.ListViewSubItem motherTongueColumn;
         private readonly ListViewItem.ListViewSubItem praticeDateColumn;
 
         public VocabularyWordController(VocabularyWord vocabularyWord)
         {
-            ListViewItem = new ListViewItem { Tag = vocabularyWord };
+            ListViewItem = new ListViewItem {Tag = vocabularyWord};
             motherTongueColumn = ListViewItem.SubItems.Add(new ListViewItem.ListViewSubItem(ListViewItem, ""));
             foreignLangColumn = ListViewItem.SubItems.Add(new ListViewItem.ListViewSubItem(ListViewItem, ""));
             praticeDateColumn = ListViewItem.SubItems.Add(new ListViewItem.ListViewSubItem(ListViewItem, ""));
@@ -30,14 +25,15 @@ namespace Vocup.Models
 
         private void UpdateUI()
         {
-            ListViewItem.ImageIndex = (int)VocabularyWord.PracticeState;
+            ListViewItem.ImageIndex = (int) VocabularyWord.PracticeState;
 
             motherTongueColumn.Text = VocabularyWord.MotherTongue;
             foreignLangColumn.Text = VocabularyWord.ForeignLangText;
             if (VocabularyWord.PracticeDate == default)
                 praticeDateColumn.Text = "";
             else
-                praticeDateColumn.Text = $"{VocabularyWord.PracticeDate.ToShortDateString()} {VocabularyWord.PracticeDate.ToShortTimeString()}";
+                praticeDateColumn.Text =
+                    $"{VocabularyWord.PracticeDate.ToShortDateString()} {VocabularyWord.PracticeDate.ToShortTimeString()}";
         }
     }
 }

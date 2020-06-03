@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 using Vocup.Models;
 using Vocup.Properties;
@@ -14,7 +15,7 @@ namespace Vocup.IO.Internal
         {
             if (string.IsNullOrWhiteSpace(book.VhrCode))
                 return false;
-            FileInfo vhrInfo = new FileInfo(Path.Combine(Settings.Default.VhrPath, book.VhrCode + ".vhr"));
+            var vhrInfo = new FileInfo(Path.Combine(Settings.Default.VhrPath, book.VhrCode + ".vhr"));
             if (!vhrInfo.Exists)
                 return false;
 
@@ -28,56 +29,69 @@ namespace Vocup.IO.Internal
                 DeleteInvalidFile(vhrInfo);
                 return false;
             }
-            catch (System.Security.Cryptography.CryptographicException)
+            catch (CryptographicException)
             {
                 DeleteInvalidFile(vhrInfo);
                 return false;
             }
 
-            using (StringReader reader = new StringReader(plaintext))
+            using (var reader = new StringReader(plaintext))
             {
-                string path = reader.ReadLine();
-                string mode = reader.ReadLine();
+                var path = reader.ReadLine();
+                var mode = reader.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(path) ||
-                    string.IsNullOrWhiteSpace(mode) || !int.TryParse(mode, out int imode) || !((PracticeMode)imode).IsValid())
+                    string.IsNullOrWhiteSpace(mode) || !int.TryParse(mode, out var imode) ||
+                    !((PracticeMode) imode).IsValid())
                 {
                     DeleteInvalidFile(vhrInfo);
                     return false;
                 }
 
-                List<(int stateNumber, DateTime date)> results = new List<(int stateNumber, DateTime date)>();
+                var results = new List<(int stateNumber, DateTime date)>();
 
                 while (true)
                 {
-                    string line = reader.ReadLine();
+                    var line = reader.ReadLine();
                     if (line == null) break;
-                    string[] columns = line.Split('#');
-                    if (columns.Length != 2 || !int.TryParse(columns[0], out int state) || !PracticeStateHelper.Parse(state).IsValid())
+                    var columns = line.Split('#');
+                    if (columns.Length != 2 || !int.TryParse(columns[0], out var state) ||
+                        !PracticeStateHelper.Parse(state).IsValid())
                     {
                         DeleteInvalidFile(vhrInfo);
                         return false;
                     }
-                    DateTime time = DateTime.MinValue;
-                    if (!string.IsNullOrWhiteSpace(columns[1]) && !DateTime.TryParseExact(columns[1], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
+
+                    var time = DateTime.MinValue;
+                    if (!string.IsNullOrWhiteSpace(columns[1]) && !DateTime.TryParseExact(columns[1],
+                        "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
                     {
                         DeleteInvalidFile(vhrInfo);
                         return false;
                     }
+
                     results.Add((state, time));
                 }
 
-                bool countMatch = book.Words.Count == results.Count;
+                var countMatch = book.Words.Count == results.Count;
 
-                FileInfo vhfInfo = new FileInfo(book.FilePath);
-                FileInfo pathInfo = new FileInfo(path);
+                var vhfInfo = new FileInfo(book.FilePath);
+                var pathInfo = new FileInfo(path);
 
                 if (vhfInfo.FullName.Equals(pathInfo.FullName, StringComparison.OrdinalIgnoreCase))
                 {
                     if (!countMatch)
                     {
-                        MessageBox.Show(Messages.VhrInvalidRowCount, Messages.VhrCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        try { vhrInfo.Delete(); } catch { }
+                        MessageBox.Show(Messages.VhrInvalidRowCount, Messages.VhrCorruptFileT, MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        try
+                        {
+                            vhrInfo.Delete();
+                        }
+                        catch
+                        {
+                        }
+
                         return false;
                     }
                 }
@@ -85,7 +99,8 @@ namespace Vocup.IO.Internal
                 {
                     if (!countMatch)
                     {
-                        MessageBox.Show(Messages.VhrInvalidRowCountAndOtherFile, Messages.VhrCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show(Messages.VhrInvalidRowCountAndOtherFile, Messages.VhrCorruptFileT,
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return false;
                     }
 
@@ -95,11 +110,11 @@ namespace Vocup.IO.Internal
                     book.UnsavedChanges = true;
                 }
 
-                book.PracticeMode = (PracticeMode)imode;
+                book.PracticeMode = (PracticeMode) imode;
 
-                for (int i = 0; i < book.Words.Count; i++)
+                for (var i = 0; i < book.Words.Count; i++)
                 {
-                    VocabularyWord word = book.Words[i];
+                    var word = book.Words[i];
                     (word.PracticeStateNumber, word.PracticeDate) = results[i];
                 }
             }
@@ -111,12 +126,12 @@ namespace Vocup.IO.Internal
         {
             string raw;
 
-            using (StringWriter writer = new StringWriter())
+            using (var writer = new StringWriter())
             {
                 writer.WriteLine(book.FilePath);
-                writer.Write((int)book.PracticeMode);
+                writer.Write((int) book.PracticeMode);
 
-                foreach (VocabularyWord word in book.Words)
+                foreach (var word in book.Words)
                 {
                     writer.WriteLine();
 
@@ -135,7 +150,8 @@ namespace Vocup.IO.Internal
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(Messages.VocupFileWriteErrorEx, ex), Messages.VocupFileWriteErrorT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Messages.VocupFileWriteErrorEx, ex), Messages.VocupFileWriteErrorT,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
@@ -143,17 +159,20 @@ namespace Vocup.IO.Internal
         }
 
         /// <summary>
-        /// Shows a message box and deletes an invalid result file.
+        ///     Shows a message box and deletes an invalid result file.
         /// </summary>
         /// <param name="info"></param>
         private void DeleteInvalidFile(FileInfo info)
         {
-            MessageBox.Show(Messages.VhrCorruptFile, Messages.VhrCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(Messages.VhrCorruptFile, Messages.VhrCorruptFileT, MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
             try
             {
                 info.Delete();
             }
-            catch { }
+            catch
+            {
+            }
         }
     }
 }

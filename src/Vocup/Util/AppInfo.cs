@@ -1,42 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using Vocup.Properties;
 
 namespace Vocup.Util
 {
     /// <summary>
-    /// Provides util methods for application metadata.
+    ///     Provides util methods for application metadata.
     /// </summary>
     public static class AppInfo
     {
         /// <summary>
-        /// Defines invalid characters for a path and thereby many strings in Vocup.
+        ///     Defines invalid characters for a path and thereby many strings in Vocup.
         /// </summary>
         public const string InvalidPathChars = "#=:\\/|<>*?\"";
 
-        /// <summary>
-        /// Gets the directory where custom special char files are stored.
-        /// </summary>
-        public static string SpecialCharDirectory { get; } = Path.Combine(Properties.Settings.Default.VhrPath, "specialchar");
+        private const int APPMODEL_ERROR_NO_PACKAGE = 15700;
 
-        public static Version GetVersion() => Assembly.GetExecutingAssembly().GetName().Version;
         /// <summary>
-        /// Returns the product version of the currently running instance.
+        ///     Gets the directory where custom special char files are stored.
         /// </summary>
-        /// <param name="length">Count of version numbers. Range from 1 to 4.</param>
-        public static string GetVersion(int length)
-        {
-            if (length < 1 || length > 4)
-                throw new ArgumentOutOfRangeException(nameof(length));
-            string version = Application.ProductVersion;
-            for (int i = 0; i < 4 - length; i++)
-                version = version.Remove(version.LastIndexOf('.'));
-            return version;
-        }
+        public static string SpecialCharDirectory { get; } = Path.Combine(Settings.Default.VhrPath, "specialchar");
 
         public static Version FileVersion => new Version(1, 0);
 
@@ -46,23 +33,42 @@ namespace Vocup.Util
         public static string CopyrightInfo { get; }
             = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright;
 
+        public static Version GetVersion()
+        {
+            return Assembly.GetExecutingAssembly().GetName().Version;
+        }
+
+        /// <summary>
+        ///     Returns the product version of the currently running instance.
+        /// </summary>
+        /// <param name="length">Count of version numbers. Range from 1 to 4.</param>
+        public static string GetVersion(int length)
+        {
+            if (length < 1 || length > 4)
+                throw new ArgumentOutOfRangeException(nameof(length));
+            var version = Application.ProductVersion;
+            for (var i = 0; i < 4 - length; i++)
+                version = version.Remove(version.LastIndexOf('.'));
+            return version;
+        }
+
         public static bool IsUwp()
         {
             if (SystemInfo.IsWindows10())
             {
-                int length = 0;
-                StringBuilder sb = new StringBuilder(0);
+                var length = 0;
+                var sb = new StringBuilder(0);
                 GetCurrentPackageFullName(ref length, sb);
                 sb = new StringBuilder(length);
-                int result = GetCurrentPackageFullName(ref length, sb);
+                var result = GetCurrentPackageFullName(ref length, sb);
                 return result != APPMODEL_ERROR_NO_PACKAGE;
             }
-            else return false;
+
+            return false;
         }
 
-        private const int APPMODEL_ERROR_NO_PACKAGE = 15700;
-
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern int GetCurrentPackageFullName(ref int packageFullNameLength, StringBuilder packageFullName);
+        private static extern int GetCurrentPackageFullName(ref int packageFullNameLength,
+            StringBuilder packageFullName);
     }
 }

@@ -10,10 +10,10 @@ using Vocup.Util;
 
 namespace Vocup
 {
-    static class Program
+    internal static class Program
     {
         /// <summary>
-        /// The main entry-point for the application.
+        ///     The main entry-point for the application.
         /// </summary>
         [STAThread]
         private static void Main(string[] args)
@@ -24,7 +24,7 @@ namespace Vocup
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            SplashScreen splash = new SplashScreen();
+            var splash = new SplashScreen();
             splash.Show();
             Application.DoEvents();
 
@@ -44,7 +44,7 @@ namespace Vocup
 
             if (args.Length > 0 && !string.IsNullOrWhiteSpace(args[0]))
             {
-                FileInfo info = new FileInfo(args[0]);
+                var info = new FileInfo(args[0]);
                 if (info.Extension == ".vhf")
                 {
                     var mainForm = new MainForm();
@@ -62,7 +62,8 @@ namespace Vocup
                         Messages.OpenUnknownFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            else if (Settings.Default.StartScreen == (int)StartScreen.LastFile && File.Exists(Settings.Default.LastFile))
+            else if (Settings.Default.StartScreen == (int) StartScreen.LastFile &&
+                     File.Exists(Settings.Default.LastFile))
             {
                 var mainForm = new MainForm();
                 mainForm.ReadFile(Settings.Default.LastFile);
@@ -80,31 +81,29 @@ namespace Vocup
         }
 
         /// <summary>
-        /// Checks the currently configured folder for .vhf files and creates it if not existing.
+        ///     Checks the currently configured folder for .vhf files and creates it if not existing.
         /// </summary>
         internal static void CreateVhfFolder()
         {
-            string folder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            var folder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
 
-            if (string.IsNullOrWhiteSpace(Settings.Default.VhfPath) || Settings.Default.VhfPath.Equals(folder, StringComparison.OrdinalIgnoreCase))
-            {
+            if (string.IsNullOrWhiteSpace(Settings.Default.VhfPath) ||
+                Settings.Default.VhfPath.Equals(folder, StringComparison.OrdinalIgnoreCase))
                 Settings.Default.VhfPath = folder;
-            }
             else
-            {
                 Directory.CreateDirectory(Settings.Default.VhfPath);
-            }
         }
 
         /// <summary>
-        /// Checks the currently configured folder for .vhr files and creates it if not existing.
+        ///     Checks the currently configured folder for .vhr files and creates it if not existing.
         /// </summary>
         internal static void CreateVhrFolder()
         {
-            string appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string folder = Path.Combine(appdata, AppInfo.ProductName); // default path
+            var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var folder = Path.Combine(appdata, AppInfo.ProductName); // default path
 
-            if (string.IsNullOrWhiteSpace(Settings.Default.VhrPath) || Settings.Default.VhrPath.Equals(folder, StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(Settings.Default.VhrPath) ||
+                Settings.Default.VhrPath.Equals(folder, StringComparison.OrdinalIgnoreCase))
             {
                 Directory.CreateDirectory(folder);
                 Settings.Default.VhrPath = folder;
@@ -118,10 +117,9 @@ namespace Vocup
         internal static void SetCulture()
         {
             if (!string.IsNullOrWhiteSpace(Settings.Default.OverrideCulture))
-            {
                 try
                 {
-                    CultureInfo culture = new CultureInfo(Settings.Default.OverrideCulture);
+                    var culture = new CultureInfo(Settings.Default.OverrideCulture);
                     CultureInfo.DefaultThreadCurrentCulture = culture;
                     CultureInfo.DefaultThreadCurrentUICulture = culture;
                 }
@@ -129,7 +127,6 @@ namespace Vocup
                 {
                     Settings.Default.OverrideCulture = "";
                 }
-            }
         }
     }
 }

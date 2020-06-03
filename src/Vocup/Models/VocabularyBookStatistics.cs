@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace Vocup.Models
@@ -39,18 +38,14 @@ namespace Vocup.Models
 
         private void VocabularyWord_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(VocabularyWord.PracticeState))
-            {
-                Refresh();
-            }
+            if (e.PropertyName == nameof(VocabularyWord.PracticeState)) Refresh();
         }
 
         public void Refresh()
         {
             int un = 0, wrongly = 0, correctly = 0, fully = 0;
 
-            foreach (VocabularyWord word in book.Words)
-            {
+            foreach (var word in book.Words)
                 switch (word.PracticeState)
                 {
                     case PracticeState.Unpracticed:
@@ -65,10 +60,7 @@ namespace Vocup.Models
                     case PracticeState.FullyPracticed:
                         fully++;
                         break;
-                    default:
-                        break;
                 }
-            }
 
             Unpracticed = un;
             WronglyPracticed = wrongly;

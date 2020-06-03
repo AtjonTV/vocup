@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 using Vocup.Models;
 using Vocup.Properties;
@@ -50,23 +49,22 @@ namespace Vocup.Forms
 
         protected override bool OnCommit()
         {
-            if (BookContainsInput(exclude: null))
+            if (BookContainsInput(null))
             {
-                DialogResult dialogResult =
+                var dialogResult =
                     MessageBox.Show(Messages.EditAddDuplicate, Messages.EditDuplicateT, MessageBoxButtons.YesNo);
 
-                if (dialogResult == DialogResult.Yes)
-                {
-                    ResetUI();
-                }
+                if (dialogResult == DialogResult.Yes) ResetUI();
             }
             else // No duplicates to handle
             {
-                book.Words.Add(new VocabularyWord()
+                book.Words.Add(new VocabularyWord
                 {
                     MotherTongue = TbMotherTongue.Text,
                     ForeignLang = TbForeignLang.Text,
-                    ForeignLangSynonym = string.IsNullOrWhiteSpace(TbForeignLangSynonym.Text) ? null : TbForeignLangSynonym.Text
+                    ForeignLangSynonym = string.IsNullOrWhiteSpace(TbForeignLangSynonym.Text)
+                        ? null
+                        : TbForeignLangSynonym.Text
                 });
 
                 firstInput = false;

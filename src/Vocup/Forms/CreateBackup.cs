@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Vocup.IO;
 using Vocup.Models;
@@ -24,28 +23,25 @@ namespace Vocup.Forms
         private void Form_Load(object sender, EventArgs e)
         {
             // Check for vocabulary book files
-            DirectoryInfo booksInfo = new DirectoryInfo(Settings.Default.VhfPath);
-            int count = 0;
-            if (booksInfo.Exists && (count = booksInfo.EnumerateFiles("*.vhf", SearchOption.AllDirectories).Count()) > 0)
+            var booksInfo = new DirectoryInfo(Settings.Default.VhfPath);
+            var count = 0;
+            if (booksInfo.Exists &&
+                (count = booksInfo.EnumerateFiles("*.vhf", SearchOption.AllDirectories).Count()) > 0)
             {
                 CbSaveAllBooks.Checked = true;
                 CbSaveAllBooks.Enabled = true;
             }
+
             CbSaveAllBooks.Text = string.Format(CbSaveAllBooks.Text, count);
 
             // Check for special char files
-            DirectoryInfo specialCharInfo = new DirectoryInfo(AppInfo.SpecialCharDirectory);
+            var specialCharInfo = new DirectoryInfo(AppInfo.SpecialCharDirectory);
             if (specialCharInfo.Exists)
             {
-                foreach (FileInfo file in specialCharInfo.GetFiles("*.txt", SearchOption.TopDirectoryOnly))
-                {
+                foreach (var file in specialCharInfo.GetFiles("*.txt", SearchOption.TopDirectoryOnly))
                     ListSpecialChars.Items.Add(Path.GetFileNameWithoutExtension(file.FullName));
-                }
 
-                if (ListSpecialChars.Items.Count > 0)
-                {
-                    GroupSpecialChar.Enabled = true;
-                }
+                if (ListSpecialChars.Items.Count > 0) GroupSpecialChar.Enabled = true;
             }
         }
 
@@ -60,16 +56,17 @@ namespace Vocup.Forms
         }
 
         /// <summary>
-        /// Enables or disables the AcceptButton depending on the user's settings.
+        ///     Enables or disables the AcceptButton depending on the user's settings.
         /// </summary>
         private void UpdateUI()
         {
-            BtnCreateBackup.Enabled = CbSaveAllBooks.Checked || ListVocabularyBooks.Items.Count > 0 || ListSpecialChars.CheckedItems.Count > 0;
+            BtnCreateBackup.Enabled = CbSaveAllBooks.Checked || ListVocabularyBooks.Items.Count > 0 ||
+                                      ListSpecialChars.CheckedItems.Count > 0;
         }
 
         private void BtnAddVocabularyBook_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog add_file = new OpenFileDialog
+            using (var add_file = new OpenFileDialog
             {
                 Title = Words.AddVocabularyBooks,
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal),
@@ -79,14 +76,10 @@ namespace Vocup.Forms
             {
                 if (add_file.ShowDialog() == DialogResult.OK)
                 {
-                    foreach (string path in add_file.FileNames)
-                    {
+                    foreach (var path in add_file.FileNames)
                         if (!ListVocabularyBooks.Items.Contains(path))
-                        {
                             // ExecuteBackup will prevent the user from including the same file twice in a backup
                             ListVocabularyBooks.Items.Add(path);
-                        }
-                    }
 
                     UpdateUI();
                 }
@@ -96,9 +89,7 @@ namespace Vocup.Forms
         private void BtnDeleteVocabularyBook_Click(object sender, EventArgs e)
         {
             while (ListVocabularyBooks.SelectedItems.Count > 0)
-            {
                 ListVocabularyBooks.Items.Remove(ListVocabularyBooks.SelectedItems[0]);
-            }
 
             BtnDeleteVocabularyBook.Enabled = false;
 
@@ -112,7 +103,7 @@ namespace Vocup.Forms
 
         private void BtnCreateBackup_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog save = new SaveFileDialog
+            using (var save = new SaveFileDialog
             {
                 Title = Words.SaveBackup,
                 Filter = Words.VocupBackupFile + " (*.vdp)|*.vdp",
@@ -122,7 +113,8 @@ namespace Vocup.Forms
                 if (save.ShowDialog() == DialogResult.OK)
                 {
                     DialogResult = DialogResult.OK;
-                    ExecuteBackup(save.FileName, CbSaveAllBooks.Checked, ListVocabularyBooks.Items.Cast<string>().Select(x => new FileInfo(x)));
+                    ExecuteBackup(save.FileName, CbSaveAllBooks.Checked,
+                        ListVocabularyBooks.Items.Cast<string>().Select(x => new FileInfo(x)));
                 }
                 else
                 {
@@ -135,18 +127,21 @@ namespace Vocup.Forms
         {
             Cursor.Current = Cursors.WaitCursor;
 
-            using (FileStream saveStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
-            using (ZipArchive archive = new ZipArchive(saveStream, ZipArchiveMode.Create))
+            using (var saveStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var archive = new ZipArchive(saveStream, ZipArchiveMode.Create))
             {
-                BackupMeta backup = new BackupMeta();
-                DirectoryInfo booksInfo = new DirectoryInfo(Settings.Default.VhfPath);
-                int counter = 0;
+                var backup = new BackupMeta();
+                var booksInfo = new DirectoryInfo(Settings.Default.VhfPath);
+                var counter = 0;
 
                 if (allBooks)
-                    AddBooks(booksInfo.EnumerateFiles("*.vhf", SearchOption.AllDirectories), archive, backup, ref counter);
+                    AddBooks(booksInfo.EnumerateFiles("*.vhf", SearchOption.AllDirectories), archive, backup,
+                        ref counter);
 
                 additionalFiles = additionalFiles
-                    .Where(info => !allBooks || !info.FullName.StartsWith(Settings.Default.VhfPath, StringComparison.OrdinalIgnoreCase));
+                    .Where(info =>
+                        !allBooks || !info.FullName.StartsWith(Settings.Default.VhfPath,
+                            StringComparison.OrdinalIgnoreCase));
                 AddBooks(additionalFiles, archive, backup, ref counter);
 
                 AddSpecialChars(ListSpecialChars.CheckedItems.Cast<string>(), archive, backup);
@@ -158,20 +153,22 @@ namespace Vocup.Forms
 
         private void AddBooks(IEnumerable<FileInfo> files, ZipArchive archive, BackupMeta backup, ref int counter)
         {
-            foreach (FileInfo fileInfo in files)
+            foreach (var fileInfo in files)
             {
-                VocabularyBook book = new VocabularyBook();
+                var book = new VocabularyBook();
                 if (VocabularyFile.ReadVhfFile(fileInfo.FullName, book))
                 {
-                    bool vhr = VocabularyFile.ReadVhrFile(book);
-                    bool success = TryAddFile(fileInfo.FullName, archive, $"vhf\\{counter}.vhf");
-                    bool success2 = false;
+                    var vhr = VocabularyFile.ReadVhrFile(book);
+                    var success = TryAddFile(fileInfo.FullName, archive, $"vhf\\{counter}.vhf");
+                    var success2 = false;
 
                     if (success && vhr && CbSaveResults.Checked)
-                        success2 = TryAddFile(Path.Combine(Settings.Default.VhrPath, book.VhrCode + ".vhr"), archive, $"vhr\\{book.VhrCode}.vhr");
+                        success2 = TryAddFile(Path.Combine(Settings.Default.VhrPath, book.VhrCode + ".vhr"), archive,
+                            $"vhr\\{book.VhrCode}.vhr");
                     if (success)
                     {
-                        backup.Books.Add(new BackupMeta.BookMeta(counter, BackupMeta.ShrinkPath(fileInfo.FullName), success2 ? book.VhrCode : ""));
+                        backup.Books.Add(new BackupMeta.BookMeta(counter, BackupMeta.ShrinkPath(fileInfo.FullName),
+                            success2 ? book.VhrCode : ""));
                         counter++;
 
                         if (success2) backup.Results.Add(book.VhrCode + ".vhr");
@@ -182,27 +179,27 @@ namespace Vocup.Forms
 
         private void AddSpecialChars(IEnumerable<string> files, ZipArchive archive, BackupMeta backup)
         {
-            foreach (FileInfo fileInfo in files.Select(path => new FileInfo(Path.Combine(AppInfo.SpecialCharDirectory, path + ".txt"))))
-            {
+            foreach (var fileInfo in files.Select(path =>
+                new FileInfo(Path.Combine(AppInfo.SpecialCharDirectory, path + ".txt"))))
                 if (TryAddFile(fileInfo.FullName, archive, "chars\\" + fileInfo.Name))
                     backup.SpecialChars.Add(fileInfo.Name);
-            }
         }
 
         private bool TryAddFile(string source, ZipArchive archive, string destination)
         {
             try
             {
-                FileInfo info = new FileInfo(source);
-                using (FileStream file = info.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
+                var info = new FileInfo(source);
+                using (var file = info.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    ZipArchiveEntry entry = archive.CreateEntry(destination);
+                    var entry = archive.CreateEntry(destination);
                     entry.LastWriteTime = new DateTimeOffset(info.LastWriteTimeUtc);
-                    using (Stream stream = entry.Open())
+                    using (var stream = entry.Open())
                     {
                         file.CopyTo(stream);
                     }
                 }
+
                 return true;
             }
             catch

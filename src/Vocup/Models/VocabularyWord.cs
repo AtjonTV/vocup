@@ -6,40 +6,63 @@ namespace Vocup.Models
 {
     public class VocabularyWord : INotifyPropertyChanged
     {
-        private string _motherTongue;
         private string _foreignLang;
         private string _foreignLangSynonym;
+        private string _motherTongue;
+        private DateTime _practiceDate;
         private PracticeState _practiceState;
         private int _practiceStateNumber;
-        private DateTime _practiceDate;
 
         public string MotherTongue
         {
             get => _motherTongue;
-            set { if (_motherTongue != value) { _motherTongue = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_motherTongue != value)
+                {
+                    _motherTongue = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public string ForeignLang
         {
             get => _foreignLang;
-            set { if (_foreignLang != value) { _foreignLang = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_foreignLang != value)
+                {
+                    _foreignLang = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public string ForeignLangSynonym
         {
             get => _foreignLangSynonym;
-            set { if (_foreignLangSynonym != value) { _foreignLangSynonym = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_foreignLangSynonym != value)
+                {
+                    _foreignLangSynonym = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public string ForeignLangText
         {
             get
             {
                 if (string.IsNullOrWhiteSpace(_foreignLangSynonym))
                     return _foreignLang;
-                else
-                    return _foreignLang + "=" + _foreignLangSynonym;
+                return _foreignLang + "=" + _foreignLangSynonym;
             }
             set
             {
-                int idx = value.LastIndexOf('=');
+                var idx = value.LastIndexOf('=');
                 if (idx == -1)
                 {
                     ForeignLang = value;
@@ -56,7 +79,14 @@ namespace Vocup.Models
         public PracticeState PracticeState
         {
             get => _practiceState;
-            private set { if (_practiceState != value) { _practiceState = value; OnPropertyChanged(); } }
+            private set
+            {
+                if (_practiceState != value)
+                {
+                    _practiceState = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public int PracticeStateNumber
@@ -66,15 +96,24 @@ namespace Vocup.Models
             {
                 if (_practiceStateNumber != value)
                 {
-                    _practiceStateNumber = value; OnPropertyChanged();
+                    _practiceStateNumber = value;
+                    OnPropertyChanged();
                     PracticeState = PracticeStateHelper.Parse(_practiceStateNumber);
                 }
             }
         }
+
         public DateTime PracticeDate
         {
             get => _practiceDate;
-            set { if (_practiceDate != value) { _practiceDate = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_practiceDate != value)
+                {
+                    _practiceDate = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public VocabularyBook Owner { get; set; }
@@ -98,7 +137,7 @@ namespace Vocup.Models
         public VocabularyWord Clone(bool copyResults)
         {
             if (copyResults)
-                return new VocabularyWord()
+                return new VocabularyWord
                 {
                     _motherTongue = _motherTongue,
                     _foreignLang = _foreignLang,
@@ -107,13 +146,12 @@ namespace Vocup.Models
                     _practiceStateNumber = _practiceStateNumber,
                     _practiceDate = _practiceDate
                 };
-            else
-                return new VocabularyWord()
-                {
-                    _motherTongue = _motherTongue,
-                    _foreignLang = _foreignLang,
-                    _foreignLangSynonym = _foreignLangSynonym
-                };
+            return new VocabularyWord
+            {
+                _motherTongue = _motherTongue,
+                _foreignLang = _foreignLang,
+                _foreignLangSynonym = _foreignLangSynonym
+            };
         }
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Vocup.Models;
 using Vocup.Properties;
@@ -11,13 +10,13 @@ namespace Vocup.Forms
 {
     public partial class PracticeResultList : Form
     {
-        private VocabularyBook book;
-        private List<VocabularyWordPractice> practiceList;
+        private readonly VocabularyBook book;
+        private int correct;
 
         private int notPracticed;
-        private int wrong;
         private int partlyCorrect;
-        private int correct;
+        private readonly List<VocabularyWordPractice> practiceList;
+        private int wrong;
 
         public PracticeResultList(VocabularyBook book, List<VocabularyWordPractice> practiceList)
         {
@@ -42,10 +41,12 @@ namespace Vocup.Forms
             ListView.BeginUpdate();
             ListView.GridLines = Settings.Default.GridLines;
 
-            foreach (VocabularyWordPractice practice in practiceList)
+            foreach (var practice in practiceList)
             {
-                VocabularyWord word = practice.VocabularyWord;
-                ListView.Items.Add(new ListViewItem(new[] { "", word.MotherTongue, word.ForeignLangText, practice.WrongInput }, (int)practice.PracticeResult));
+                var word = practice.VocabularyWord;
+                ListView.Items.Add(new ListViewItem(
+                    new[] {"", word.MotherTongue, word.ForeignLangText, practice.WrongInput},
+                    (int) practice.PracticeResult));
             }
 
             ListView.EndUpdate();
@@ -53,7 +54,7 @@ namespace Vocup.Forms
 
 
             //Zahlen aktualiseren
-            IEnumerable<PracticeResult> results = practiceList.Select(x => x.PracticeResult);
+            var results = practiceList.Select(x => x.PracticeResult);
 
             notPracticed = results.Where(x => x == PracticeResult.NotPracticed).Count();
             wrong = results.Where(x => x == PracticeResult.Wrong).Count();
@@ -71,9 +72,8 @@ namespace Vocup.Forms
         private void Form_Shown(object sender, EventArgs e)
         {
             if (book.Statistics.NotFullyPracticed == 0)
-            {
-                MessageBox.Show(Messages.BookPracticeFinished, Messages.BookPracticeFinishedT, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+                MessageBox.Show(Messages.BookPracticeFinished, Messages.BookPracticeFinishedT, MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
         }
 
         // Prevents the user from changing these columns
@@ -109,7 +109,8 @@ namespace Vocup.Forms
                 decimal grade;
                 if (Settings.Default.PracticeGradeCulture == "de-DE")
                 {
-                    grade = 7M - Math.Round(((correct + partlyCorrect / 2M) * 5M / (practiceList.Count - notPracticed)) + 1, 1);
+                    grade = 7M - Math.Round(
+                        (correct + partlyCorrect / 2M) * 5M / (practiceList.Count - notPracticed) + 1, 1);
 
                     //Hintergrundfarbe bestimmen
                     if (grade > 3)
@@ -121,7 +122,8 @@ namespace Vocup.Forms
                 }
                 else
                 {
-                    grade = Math.Round(((correct + partlyCorrect / 2M) * 5M / (practiceList.Count - notPracticed)) + 1, 1);
+                    grade = Math.Round((correct + partlyCorrect / 2M) * 5M / (practiceList.Count - notPracticed) + 1,
+                        1);
 
                     //Hintergrundfarbe bestimmen
                     if (grade < 4)
@@ -133,7 +135,8 @@ namespace Vocup.Forms
                 }
 
                 //Prozent berechnen
-                TbPercentage.Text = Math.Round((correct + partlyCorrect / 2M) / (practiceList.Count - notPracticed) * 100M) + "%";
+                TbPercentage.Text =
+                    Math.Round((correct + partlyCorrect / 2M) / (practiceList.Count - notPracticed) * 100M) + "%";
 
                 //Note anzeigen
                 TbGrade.Text = grade.ToString();

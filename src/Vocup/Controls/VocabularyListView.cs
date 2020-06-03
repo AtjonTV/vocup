@@ -10,13 +10,13 @@ namespace Vocup.Controls
 {
     public partial class VocabularyListView : UserControl
     {
-        private Size _imageBaseSize = new Size(16, 16);
         private readonly int initialWidthImage = 20;
         private readonly int initialWidthLastPracticed = 120;
-
-        private SizeF scalingFactor = new SizeF(1F, 1F);
+        private Size _imageBaseSize = new Size(16, 16);
         private int scaledWidthImage;
         private int scaledWidthLastPracticed;
+
+        private SizeF scalingFactor = new SizeF(1F, 1F);
 
         public VocabularyListView()
         {
@@ -25,7 +25,7 @@ namespace Vocup.Controls
 
             InitializeComponent();
 
-            MainListView.ListViewItemSorter = new Sorter() { Column = 1, SortOrder = SortOrder.Ascending };
+            MainListView.ListViewItemSorter = new Sorter {Column = 1, SortOrder = SortOrder.Ascending};
             MainListView.Sorting = SortOrder.Ascending;
             MainListView.ItemSelectionChanged += MainListView_ItemSelectionChanged;
         }
@@ -73,13 +73,13 @@ namespace Vocup.Controls
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {
             scalingFactor = scalingFactor.Multiply(factor);
-            scaledWidthImage = (int)Math.Round(initialWidthImage * scalingFactor.Width);
-            scaledWidthLastPracticed = (int)Math.Round(initialWidthLastPracticed * scalingFactor.Width);
+            scaledWidthImage = (int) Math.Round(initialWidthImage * scalingFactor.Width);
+            scaledWidthLastPracticed = (int) Math.Round(initialWidthLastPracticed * scalingFactor.Width);
 
             imageColumn.Width = scaledWidthImage;
             // Here we don't save defaults and therefore directly scale with factor.
-            motherTongueColumn.Width = (int)Math.Round(motherTongueColumn.Width * factor.Width);
-            foreignLangColumn.Width = (int)Math.Round(foreignLangColumn.Width * factor.Width);
+            motherTongueColumn.Width = (int) Math.Round(motherTongueColumn.Width * factor.Width);
+            foreignLangColumn.Width = (int) Math.Round(foreignLangColumn.Width * factor.Width);
             lastPracticedColumn.Width = scaledWidthLastPracticed;
 
             ScaleImageList();
@@ -89,14 +89,14 @@ namespace Vocup.Controls
 
         private void ScaleImageList()
         {
-            ImageList old = MainListView.SmallImageList;
+            var old = MainListView.SmallImageList;
             MainListView.SmallImageList = IconImageList.Scale(_imageBaseSize.Multiply(scalingFactor).Rectify().Round());
             old?.Dispose();
         }
 
         private void MainListView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            Sorter sorter = (Sorter)MainListView.ListViewItemSorter;
+            var sorter = (Sorter) MainListView.ListViewItemSorter;
             if (sorter.Column == e.Column)
             {
                 if (sorter.SortOrder == SortOrder.Ascending)
@@ -133,21 +133,16 @@ namespace Vocup.Controls
         private void MainListView_ColumnWidthChanged(object sender, ColumnWidthChangedEventArgs e)
         {
             if (e.ColumnIndex == 0)
-            {
                 imageColumn.Width = scaledWidthImage;
-            }
-            else if (e.ColumnIndex == 3)
-            {
-                lastPracticedColumn.Width = scaledWidthLastPracticed;
-            }
+            else if (e.ColumnIndex == 3) lastPracticedColumn.Width = scaledWidthLastPracticed;
         }
 
         private void MainListView_Resize(object sender, EventArgs e)
         {
             if (Settings.Default.ColumnResize)
             {
-                int include = SystemInformation.VerticalScrollBarWidth + MainListView.Columns.Count;
-                int width = (MainListView.Width - imageColumn.Width - lastPracticedColumn.Width - include) / 2;
+                var include = SystemInformation.VerticalScrollBarWidth + MainListView.Columns.Count;
+                var width = (MainListView.Width - imageColumn.Width - lastPracticedColumn.Width - include) / 2;
                 motherTongueColumn.Width = width;
                 foreignLangColumn.Width = width;
             }
@@ -172,16 +167,17 @@ namespace Vocup.Controls
                 switch (Column)
                 {
                     case 0:
-                        return Inv(((ListViewItem)x).ImageIndex.CompareTo(((ListViewItem)y).ImageIndex));
+                        return Inv(((ListViewItem) x).ImageIndex.CompareTo(((ListViewItem) y).ImageIndex));
                     case 1:
                     case 2:
-                        return Inv(((ListViewItem)x).SubItems[Column].Text.CompareTo(((ListViewItem)y).SubItems[Column].Text));
+                        return Inv(((ListViewItem) x).SubItems[Column].Text
+                            .CompareTo(((ListViewItem) y).SubItems[Column].Text));
                     case 3:
-                        string left = ((ListViewItem)x).SubItems[3].Text;
-                        string right = ((ListViewItem)y).SubItems[3].Text;
-                        if (!DateTime.TryParse(left, out DateTime leftTime))
+                        var left = ((ListViewItem) x).SubItems[3].Text;
+                        var right = ((ListViewItem) y).SubItems[3].Text;
+                        if (!DateTime.TryParse(left, out var leftTime))
                             leftTime = DateTime.MinValue;
-                        if (!DateTime.TryParse(right, out DateTime rightTime))
+                        if (!DateTime.TryParse(right, out var rightTime))
                             rightTime = DateTime.MinValue;
                         return Inv(leftTime.CompareTo(rightTime));
                     default:
@@ -193,8 +189,7 @@ namespace Vocup.Controls
             {
                 if (SortOrder != SortOrder.Descending)
                     return ascending;
-                else
-                    return -ascending;
+                return -@ascending;
             }
         }
     }

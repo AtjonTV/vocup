@@ -1,7 +1,5 @@
-﻿using Octokit;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Octokit;
 
 namespace Vocup.Util.Network
 {
@@ -10,7 +8,7 @@ namespace Vocup.Util.Network
         public async Task Start()
         {
             var github = new GitHubClient(new ProductHeaderValue(AppInfo.ProductName, AppInfo.GetVersion(3)));
-            IReadOnlyList<Release> releases = await github.Repository.Release.GetAll("daniel-lerch", "vocup");
+            var releases = await github.Repository.Release.GetAll("daniel-lerch", "vocup");
         }
     }
 }

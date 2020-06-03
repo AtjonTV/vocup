@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Vocup.Properties;
 
@@ -11,10 +9,6 @@ namespace Vocup.Models
 {
     public class BackupMeta
     {
-        public List<BookMeta> Books { get; }
-        public List<string> Results { get; }
-        public List<string> SpecialChars { get; }
-
         public BackupMeta()
         {
             Books = new List<BookMeta>();
@@ -22,12 +16,16 @@ namespace Vocup.Models
             SpecialChars = new List<string>();
         }
 
+        public List<BookMeta> Books { get; }
+        public List<string> Results { get; }
+        public List<string> SpecialChars { get; }
+
         public void Write(ZipArchive archive)
         {
             var books = archive.CreateEntry("vhf_vhr.log");
-            using (StreamWriter writer = new StreamWriter(books.Open()))
+            using (var writer = new StreamWriter(books.Open()))
             {
-                for (int i = 0; i < Books.Count; i++)
+                for (var i = 0; i < Books.Count; i++)
                 {
                     if (i != 0) writer.WriteLine();
                     writer.Write(Books[i].FileId);
@@ -39,9 +37,9 @@ namespace Vocup.Models
             }
 
             var results = archive.CreateEntry("vhr.log");
-            using (StreamWriter writer = new StreamWriter(results.Open()))
+            using (var writer = new StreamWriter(results.Open()))
             {
-                for (int i = 0; i < Results.Count; i++)
+                for (var i = 0; i < Results.Count; i++)
                 {
                     if (i != 0) writer.WriteLine();
                     writer.Write(Results[i]);
@@ -49,9 +47,9 @@ namespace Vocup.Models
             }
 
             var chars = archive.CreateEntry("chars.log");
-            using (StreamWriter writer = new StreamWriter(chars.Open()))
+            using (var writer = new StreamWriter(chars.Open()))
             {
-                for (int i = 0; i < SpecialChars.Count; i++)
+                for (var i = 0; i < SpecialChars.Count; i++)
                 {
                     if (i != 0) writer.WriteLine();
                     writer.Write(SpecialChars[i]);
@@ -67,13 +65,13 @@ namespace Vocup.Models
                 var books = archive.GetEntry("vhf_vhr.log");
                 if (books == null) return false;
 
-                using (StreamReader reader = new StreamReader(books.Open()))
+                using (var reader = new StreamReader(books.Open()))
                 {
                     while (true)
                     {
-                        string line = reader.ReadLine();
+                        var line = reader.ReadLine();
                         if (string.IsNullOrEmpty(line)) break;
-                        string[] parts = line.Split('|');
+                        var parts = line.Split('|');
                         if (parts.Length < 3)
                             continue; // Skip invalid item
                         backup.Books.Add(new BookMeta(int.Parse(parts[0]), parts[1], parts[2]));
@@ -83,11 +81,11 @@ namespace Vocup.Models
                 var results = archive.GetEntry("vhr.log");
                 if (results == null) return false;
 
-                using (StreamReader reader = new StreamReader(results.Open()))
+                using (var reader = new StreamReader(results.Open()))
                 {
                     while (true)
                     {
-                        string line = reader.ReadLine();
+                        var line = reader.ReadLine();
                         if (string.IsNullOrEmpty(line)) break;
                         backup.Results.Add(line);
                     }
@@ -96,11 +94,11 @@ namespace Vocup.Models
                 var chars = archive.GetEntry("chars.log");
                 if (chars == null) return false;
 
-                using (StreamReader reader = new StreamReader(chars.Open()))
+                using (var reader = new StreamReader(chars.Open()))
                 {
                     while (true)
                     {
-                        string line = reader.ReadLine();
+                        var line = reader.ReadLine();
                         if (string.IsNullOrEmpty(line)) break;
                         backup.SpecialChars.Add(line);
                     }
@@ -110,7 +108,8 @@ namespace Vocup.Models
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(Messages.VdpCorruptFile, ex), Messages.VdpCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Messages.VdpCorruptFile, ex), Messages.VdpCorruptFileT,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }

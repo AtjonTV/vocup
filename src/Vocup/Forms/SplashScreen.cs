@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
 using System.Windows.Forms;
+using Vocup.Util;
 
 namespace Vocup.Forms
 {
@@ -16,8 +15,9 @@ namespace Vocup.Forms
 
         private void SplashScreen_Paint(object sender, PaintEventArgs e)
         {
-            using (LinearGradientBrush brush = new LinearGradientBrush(new Point(0, 0), new Point(0, Height), Color.White, Color.LightGray))
-            using (Pen grayPen = new Pen(Brushes.Gray, width: 2.0f))
+            using (var brush =
+                new LinearGradientBrush(new Point(0, 0), new Point(0, Height), Color.White, Color.LightGray))
+            using (var grayPen = new Pen(Brushes.Gray, 2.0f))
             {
                 // Draw background
                 e.Graphics.FillRectangle(brush, 0, 0, Width, Height);
@@ -31,8 +31,8 @@ namespace Vocup.Forms
         {
             // Display version and copyright
 
-            LbVersion.Text = string.Format(LbVersion.Text, Util.AppInfo.GetVersion(3));
-            LbCopyright.Text = Util.AppInfo.CopyrightInfo;
+            LbVersion.Text = string.Format(LbVersion.Text, AppInfo.GetVersion(3));
+            LbCopyright.Text = AppInfo.CopyrightInfo;
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.Windows.Forms;
 using Vocup.Models;
 using Vocup.Properties;
@@ -10,7 +11,12 @@ namespace Vocup.Forms
 {
     public partial class PrintWordSelection : Form
     {
-        VocabularyBook book;
+        private readonly VocabularyBook book;
+        private bool invertSides;
+        private int pageNumber = 1;
+
+        private readonly List<VocabularyWord> printList = new List<VocabularyWord>();
+        private int wordNumber;
 
         public PrintWordSelection(VocabularyBook book)
         {
@@ -20,7 +26,7 @@ namespace Vocup.Forms
             this.book = book;
 
             ListBox.BeginUpdate();
-            foreach (VocabularyWord word in book.Words)
+            foreach (var word in book.Words)
                 ListBox.Items.Add($"{word.MotherTongue} - {word.ForeignLangText}", true);
             ListBox.EndUpdate();
 
@@ -45,15 +51,11 @@ namespace Vocup.Forms
 
         private void BtnContinue_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < book.Words.Count; i++) // Compose print list
-            {
+            for (var i = 0; i < book.Words.Count; i++) // Compose print list
                 if (ListBox.GetItemChecked(i))
-                {
                     printList.Add(book.Words[i]);
-                }
-            }
 
-            PrintDialog dialog = new PrintDialog()
+            var dialog = new PrintDialog
             {
                 AllowCurrentPage = false,
                 AllowSomePages = false,
@@ -79,7 +81,8 @@ namespace Vocup.Forms
 
         private void CheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            bool selection = CbUnpracticed.Checked || CbWronglyPracticed.Checked || CbCorrectlyPracticed.Checked || CbFullyPracticed.Checked;
+            var selection = CbUnpracticed.Checked || CbWronglyPracticed.Checked || CbCorrectlyPracticed.Checked ||
+                            CbFullyPracticed.Checked;
 
             BtnCheckAll.Enabled = !selection;
             BtnUncheckAll.Enabled = !selection;
@@ -101,79 +104,74 @@ namespace Vocup.Forms
         {
             ListBox.BeginUpdate();
 
-            for (int i = 0; i < book.Words.Count; i++)
-            {
+            for (var i = 0; i < book.Words.Count; i++)
                 if (predicate(book.Words[i]))
-                {
                     ListBox.SetItemChecked(i, value);
-                }
-            }
 
             ListBox.EndUpdate();
         }
 
-        private List<VocabularyWord> printList = new List<VocabularyWord>();
-        private int wordNumber = 0;
-        private int pageNumber = 1;
-        private bool invertSides;
-
-        private void PrintList_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        private void PrintList_PrintPage(object sender, PrintPageEventArgs e)
         {
-            Graphics g = e.Graphics;
+            var g = e.Graphics;
             g.PageUnit = GraphicsUnit.Display;
 
-            int hoffset = 0;
-            int sitePrintedWords = 0;
-            int tableBegin = 0;
+            var hoffset = 0;
+            var sitePrintedWords = 0;
+            var tableBegin = 0;
 
-            int sideOffset = 2;
-            int lineOffset = 2;
-            int lineThickness = 1;
-            int textMinHeight = 17;
+            var sideOffset = 2;
+            var lineOffset = 2;
+            var lineThickness = 1;
+            var textMinHeight = 17;
 
-            using (Font siteFont = new Font("Arial", 11))
-            using (StringFormat centerFormat = new StringFormat() { Alignment = StringAlignment.Center })
+            using (var siteFont = new Font("Arial", 11))
+            using (var centerFormat = new StringFormat {Alignment = StringAlignment.Center})
             {
-                g.DrawString($"{Words.Site} {pageNumber}", siteFont, Brushes.Black, e.MarginBounds.SetHeight(20).Move(0, -20), centerFormat);
+                g.DrawString($"{Words.Site} {pageNumber}", siteFont, Brushes.Black,
+                    e.MarginBounds.SetHeight(20).Move(0, -20), centerFormat);
             }
 
-            using (Font titleFont = new Font("Arial", 12, FontStyle.Bold))
-            using (StringFormat centerFormat = new StringFormat() { Alignment = StringAlignment.Center })
+            using (var titleFont = new Font("Arial", 12, FontStyle.Bold))
+            using (var centerFormat = new StringFormat {Alignment = StringAlignment.Center})
             {
-                string name = string.IsNullOrWhiteSpace(book.Name) ? "" : book.Name + ": ";
-                string left = invertSides ? book.ForeignLang : book.MotherTongue;
-                string right = invertSides ? book.MotherTongue : book.ForeignLang;
-                string title = $"{name}{left} - {right}";
+                var name = string.IsNullOrWhiteSpace(book.Name) ? "" : book.Name + ": ";
+                var left = invertSides ? book.ForeignLang : book.MotherTongue;
+                var right = invertSides ? book.MotherTongue : book.ForeignLang;
+                var title = $"{name}{left} - {right}";
 
-                g.DrawString(title, titleFont, Brushes.Black, e.MarginBounds.MarginTop(hoffset).SetHeight(25), centerFormat);
+                g.DrawString(title, titleFont, Brushes.Black, e.MarginBounds.MarginTop(hoffset).SetHeight(25),
+                    centerFormat);
                 hoffset += 25;
                 tableBegin = hoffset;
             }
 
-            using (Font font = new Font("Arial", 10))
-            using (StringFormat nearFormat = new StringFormat() { Alignment = StringAlignment.Near })
-            using (Pen pen = new Pen(Brushes.Black, lineThickness))
+            using (var font = new Font("Arial", 10))
+            using (var nearFormat = new StringFormat {Alignment = StringAlignment.Near})
+            using (var pen = new Pen(Brushes.Black, lineThickness))
             {
-                for (; ; wordNumber++, sitePrintedWords++) // loop through printList
+                for (;; wordNumber++, sitePrintedWords++) // loop through printList
                 {
-                    Rectangle rect = e.MarginBounds.MarginTop(hoffset += lineOffset);
+                    var rect = e.MarginBounds.MarginTop(hoffset += lineOffset);
                     g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top); // Draw horizontal lines
-                    hoffset += (int)pen.Width + lineOffset;
+                    hoffset += (int) pen.Width + lineOffset;
 
                     if (wordNumber >= printList.Count) break;
 
                     rect = e.MarginBounds.MarginTop(hoffset);
-                    VocabularyWord word = printList[wordNumber];
-                    Rectangle left = new Rectangle(rect.X, rect.Y, rect.Width / 2, rect.Height).MarginSide(sideOffset);
-                    Rectangle right = new Rectangle(left.Right, rect.Y, rect.Width / 2, rect.Height).MarginSide(sideOffset)
+                    var word = printList[wordNumber];
+                    var left = new Rectangle(rect.X, rect.Y, rect.Width / 2, rect.Height).MarginSide(sideOffset);
+                    var right = new Rectangle(left.Right, rect.Y, rect.Width / 2, rect.Height).MarginSide(sideOffset)
                         .MarginLeft(lineThickness); // right column is smaller than the left one because of the line
-                    string leftText = invertSides ? word.ForeignLangText : word.MotherTongue;
-                    string rightText = invertSides ? word.MotherTongue : word.ForeignLangText;
+                    var leftText = invertSides ? word.ForeignLangText : word.MotherTongue;
+                    var rightText = invertSides ? word.MotherTongue : word.ForeignLangText;
 
-                    SizeF leftSize = g.MeasureString(leftText, font, left.Size, nearFormat, out int leftChars, out int leftLines);
-                    SizeF rightSize = g.MeasureString(rightText, font, right.Size, nearFormat, out int rightChars, out int rightLines);
-                    bool missingChars = leftChars < leftText.Length || rightChars < rightText.Length;
-                    int textHeight = (int)Math.Max(textMinHeight, Math.Max(leftSize.Height, rightSize.Height));
+                    var leftSize = g.MeasureString(leftText, font, left.Size, nearFormat, out var leftChars,
+                        out var leftLines);
+                    var rightSize = g.MeasureString(rightText, font, right.Size, nearFormat, out var rightChars,
+                        out var rightLines);
+                    var missingChars = leftChars < leftText.Length || rightChars < rightText.Length;
+                    var textHeight = (int) Math.Max(textMinHeight, Math.Max(leftSize.Height, rightSize.Height));
 
                     if (sitePrintedWords > 0 && (missingChars || textHeight > rect.Height))
                     {
@@ -187,13 +185,13 @@ namespace Vocup.Forms
                 }
             }
 
-            using (Pen pen = new Pen(Brushes.Black, lineThickness)) // Draw vertical lines
+            using (var pen = new Pen(Brushes.Black, lineThickness)) // Draw vertical lines
             {
-                Rectangle table = e.MarginBounds.MarginTop(tableBegin + lineOffset)
+                var table = e.MarginBounds.MarginTop(tableBegin + lineOffset)
                     .SetHeight(hoffset - tableBegin - lineThickness - 2 * lineOffset);
                 g.DrawLine(pen, table.Left, table.Top, table.Left, table.Bottom);
                 g.DrawLine(pen, table.Right, table.Top, table.Right, table.Bottom);
-                int middleX = table.Left + table.Width / 2;
+                var middleX = table.Left + table.Width / 2;
                 g.DrawLine(pen, middleX, table.Top, middleX, table.Bottom);
             }
 

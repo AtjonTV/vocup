@@ -1,10 +1,10 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Vocup.Models;
 using Vocup.Properties;
 
@@ -16,21 +16,23 @@ namespace Vocup.IO.Internal
         {
             try
             {
-                Configuration config = new Configuration();
+                var config = new Configuration();
                 config.RegisterClassMap(new EntryMap());
 
-                using (StreamReader file = new StreamReader(path, detectEncodingFromByteOrderMarks: true))
-                using (CsvReader reader = new CsvReader(file, config))
+                using (var file = new StreamReader(path, true))
+                using (var reader = new CsvReader(file, config))
                 {
                     if (!reader.Read() || !reader.ReadHeader())
                     {
-                        MessageBox.Show(Messages.CsvInvalidHeader, Messages.CsvInvalidHeaderT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Messages.CsvInvalidHeader, Messages.CsvInvalidHeaderT, MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
                         return false;
                     }
 
                     if (reader.Context.HeaderRecord.Length != 2)
                     {
-                        MessageBox.Show(string.Format(Messages.CsvInvalidHeaderColumns, reader.Context.HeaderRecord.Length),
+                        MessageBox.Show(
+                            string.Format(Messages.CsvInvalidHeaderColumns, reader.Context.HeaderRecord.Length),
                             Messages.CsvInvalidHeaderT, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
@@ -40,36 +42,37 @@ namespace Vocup.IO.Internal
                         book.MotherTongue = reader.Context.HeaderRecord[0];
                         book.ForeignLang = reader.Context.HeaderRecord[1];
                     }
-                    else if (reader.Context.HeaderRecord[0] != book.MotherTongue || reader.Context.HeaderRecord[1] != book.ForeignLang)
+                    else if (reader.Context.HeaderRecord[0] != book.MotherTongue ||
+                             reader.Context.HeaderRecord[1] != book.ForeignLang)
                     {
-                        DialogResult dialogResult = MessageBox.Show(
-                            string.Format(Messages.CsvInvalidLanguages, reader.Context.HeaderRecord[0], reader.Context.HeaderRecord[1]),
+                        var dialogResult = MessageBox.Show(
+                            string.Format(Messages.CsvInvalidLanguages, reader.Context.HeaderRecord[0],
+                                reader.Context.HeaderRecord[1]),
                             Messages.CsvInvalidHeaderT, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
                         if (dialogResult == DialogResult.No)
                             return false;
                     }
 
-                    foreach (Entry entry in reader.GetRecords<Entry>())
-                    {
-                        if (!book.Words.Any(x => x.MotherTongue == entry.MotherTongue && x.ForeignLangText == entry.ForeignLang))
-                        {
+                    foreach (var entry in reader.GetRecords<Entry>())
+                        if (!book.Words.Any(x =>
+                            x.MotherTongue == entry.MotherTongue && x.ForeignLangText == entry.ForeignLang))
                             book.Words.Add(new VocabularyWord
                             {
                                 Owner = book,
                                 MotherTongue = entry.MotherTongue,
                                 ForeignLangText = entry.ForeignLang
                             });
-                        }
-                    }
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(Messages.CsvImportError, ex), Messages.UnexpectedErrorT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Messages.CsvImportError, ex), Messages.UnexpectedErrorT,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
             return false;
         }
 
@@ -77,21 +80,24 @@ namespace Vocup.IO.Internal
         {
             try
             {
-                Configuration config = new Configuration();
+                var config = new Configuration();
                 config.RegisterClassMap(new EntryMap(book.MotherTongue, book.ForeignLang));
 
                 using (TextWriter file = new StreamWriter(path, false, Encoding.UTF8))
-                using (CsvWriter writer = new CsvWriter(file, config))
+                using (var writer = new CsvWriter(file, config))
                 {
-                    writer.WriteRecords(book.Words.Select(x => new Entry() { MotherTongue = x.MotherTongue, ForeignLang = x.ForeignLangText }));
+                    writer.WriteRecords(book.Words.Select(x => new Entry
+                        {MotherTongue = x.MotherTongue, ForeignLang = x.ForeignLangText}));
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(Messages.CsvExportError, ex), Messages.UnexpectedErrorT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Messages.CsvExportError, ex), Messages.UnexpectedErrorT,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
             return false;
         }
 

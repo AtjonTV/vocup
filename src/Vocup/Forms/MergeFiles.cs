@@ -12,11 +12,10 @@ namespace Vocup.Forms
 {
     public partial class MergeFiles : Form
     {
+        private readonly List<VocabularyBook> books;
         private readonly Color redBgColor = Color.FromArgb(255, 192, 203);
         private readonly SpecialCharKeyboard specialCharDialog;
         private bool textsValid;
-
-        private readonly List<VocabularyBook> books;
 
         public MergeFiles()
         {
@@ -31,7 +30,7 @@ namespace Vocup.Forms
 
         private void BtnAdd_Click(object sender, EventArgs e)
         {
-            OpenFileDialog addFile = new OpenFileDialog
+            var addFile = new OpenFileDialog
             {
                 Title = Words.AddVocabularyBooks,
                 InitialDirectory = Settings.Default.VhfPath,
@@ -41,25 +40,31 @@ namespace Vocup.Forms
 
             if (addFile.ShowDialog() == DialogResult.OK)
             {
-                foreach (string file in addFile.FileNames)
+                foreach (var file in addFile.FileNames)
                 {
-                    VocabularyBook book = new VocabularyBook();
+                    var book = new VocabularyBook();
                     if (!VocabularyFile.ReadVhfFile(file, book))
                         continue;
                     VocabularyFile.ReadVhrFile(book);
-                    VocabularyBook conflict = books.Where(x => x.FilePath.Equals(book.FilePath, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                    var conflict = books
+                        .Where(x => x.FilePath.Equals(book.FilePath, StringComparison.OrdinalIgnoreCase))
+                        .FirstOrDefault();
                     if (conflict != null)
                     {
-                        if (MessageBox.Show(Messages.MergeOverride, Messages.MergeOverrideT, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                        if (MessageBox.Show(Messages.MergeOverride, Messages.MergeOverrideT, MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Warning) == DialogResult.No)
                             continue;
                         books.Remove(conflict);
                         LbFiles.Items.Remove(conflict.FilePath);
                     }
+
                     books.Add(book);
                     LbFiles.Items.Add(book.FilePath);
                 }
+
                 ValidateInput();
             }
+
             addFile.Dispose();
         }
 
@@ -67,7 +72,7 @@ namespace Vocup.Forms
         {
             while (LbFiles.SelectedItems.Count > 0)
             {
-                string file = LbFiles.SelectedItems[0].ToString();
+                var file = LbFiles.SelectedItems[0].ToString();
                 books.RemoveAll(x => x.FilePath == file);
                 LbFiles.Items.Remove(file);
             }
@@ -82,22 +87,22 @@ namespace Vocup.Forms
 
         private void TextBox_TextChanged(object sender, EventArgs e)
         {
-            bool mValid = !TbMotherTongue.Text.ContainsAny(AppInfo.InvalidPathChars);
+            var mValid = !TbMotherTongue.Text.ContainsAny(AppInfo.InvalidPathChars);
             TbMotherTongue.BackColor = mValid ? Color.White : redBgColor;
-            bool fValid = !TbForeignLang.Text.ContainsAny(AppInfo.InvalidPathChars);
+            var fValid = !TbForeignLang.Text.ContainsAny(AppInfo.InvalidPathChars);
             TbForeignLang.BackColor = fValid ? Color.White : redBgColor;
 
             textsValid = mValid && fValid &&
-                !string.IsNullOrWhiteSpace(TbMotherTongue.Text) &&
-                !string.IsNullOrWhiteSpace(TbForeignLang.Text) &&
-                TbMotherTongue.Text != TbForeignLang.Text;
+                         !string.IsNullOrWhiteSpace(TbMotherTongue.Text) &&
+                         !string.IsNullOrWhiteSpace(TbForeignLang.Text) &&
+                         TbMotherTongue.Text != TbForeignLang.Text;
 
             ValidateInput();
         }
 
         private void ValidateInput()
         {
-            bool itemsValid = LbFiles.Items.Count > 1;
+            var itemsValid = LbFiles.Items.Count > 1;
             GroupMotherTongue.Enabled = itemsValid;
             GroupForeignTongue.Enabled = itemsValid;
             CbKeepResults.Enabled = itemsValid;
@@ -117,14 +122,14 @@ namespace Vocup.Forms
 
         private void TextBox_Enter(object sender, EventArgs e)
         {
-            specialCharDialog.RegisterTextBox((TextBox)sender);
+            specialCharDialog.RegisterTextBox((TextBox) sender);
         }
 
         private void BtnSave_Click(object sender, EventArgs e)
         {
             string path;
 
-            using (SaveFileDialog save = new SaveFileDialog
+            using (var save = new SaveFileDialog
             {
                 Title = Words.SaveVocabularyBook,
                 FileName = TbMotherTongue.Text + " - " + TbForeignLang.Text,
@@ -145,27 +150,24 @@ namespace Vocup.Forms
 
             Cursor.Current = Cursors.WaitCursor;
 
-            VocabularyBook result = new VocabularyBook
+            var result = new VocabularyBook
             {
                 MotherTongue = TbMotherTongue.Text,
                 ForeignLang = TbForeignLang.Text,
                 FilePath = path
             };
 
-            foreach (VocabularyBook book in books)
-            {
-                foreach (VocabularyWord word in book.Words)
-                {
-                    CopyWord(word, result);
-                }
-            }
+            foreach (var book in books)
+            foreach (var word in book.Words)
+                CopyWord(word, result);
 
             result.GenerateVhrCode();
 
             if (!VocabularyFile.WriteVhfFile(path, result) ||
                 !VocabularyFile.WriteVhrFile(result))
             {
-                MessageBox.Show(Messages.VocupFileWriteError, Messages.VocupFileWriteErrorT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Messages.VocupFileWriteError, Messages.VocupFileWriteErrorT, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
                 DialogResult = DialogResult.Abort;
             }
             else
@@ -178,11 +180,11 @@ namespace Vocup.Forms
 
         private void CopyWord(VocabularyWord word, VocabularyBook target)
         {
-            VocabularyWord cloned = word.Clone(CbKeepResults.Checked);
+            var cloned = word.Clone(CbKeepResults.Checked);
 
-            for (int i = 0; i < target.Words.Count; i++)
+            for (var i = 0; i < target.Words.Count; i++)
             {
-                VocabularyWord comp = target.Words[i];
+                var comp = target.Words[i];
                 if (cloned.MotherTongue == comp.MotherTongue &&
                     cloned.ForeignLang == comp.ForeignLang &&
                     cloned.ForeignLangSynonym == comp.ForeignLangSynonym)

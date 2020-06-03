@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Vocup.Properties;
@@ -57,10 +55,7 @@ namespace Vocup.Forms
 
         private void LwComponents_DoubleClick(object sender, EventArgs e)
         {
-            if (LwComponents.SelectedItems.Count > 0)
-            {
-                Process.Start(LwComponents.SelectedItems[0].SubItems[3].Text);
-            }
+            if (LwComponents.SelectedItems.Count > 0) Process.Start(LwComponents.SelectedItems[0].SubItems[3].Text);
         }
     }
 }

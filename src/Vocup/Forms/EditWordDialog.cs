@@ -41,9 +41,9 @@ namespace Vocup.Forms
 
         protected override bool OnCommit()
         {
-            if (BookContainsInput(exclude: word))
+            if (BookContainsInput(word))
             {
-                DialogResult dialogResult = 
+                var dialogResult =
                     MessageBox.Show(Messages.EditToDuplicate, Messages.EditDuplicateT, MessageBoxButtons.YesNoCancel);
 
                 if (dialogResult == DialogResult.Yes)
@@ -51,29 +51,24 @@ namespace Vocup.Forms
                     book.Words.Remove(word);
                     return true;
                 }
-                else if (dialogResult == DialogResult.No)
-                {
+
+                if (dialogResult == DialogResult.No)
                     return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
-            else // No duplicates to handle
+
+            word.MotherTongue = TbMotherTongue.Text;
+            word.ForeignLang = TbForeignLang.Text;
+            word.ForeignLangSynonym =
+                string.IsNullOrWhiteSpace(TbForeignLangSynonym.Text) ? null : TbForeignLangSynonym.Text;
+
+            if (CbResetResults.Checked)
             {
-                word.MotherTongue = TbMotherTongue.Text;
-                word.ForeignLang = TbForeignLang.Text;
-                word.ForeignLangSynonym = string.IsNullOrWhiteSpace(TbForeignLangSynonym.Text) ? null : TbForeignLangSynonym.Text;
-
-                if (CbResetResults.Checked)
-                {
-                    word.PracticeStateNumber = 0;
-                    word.PracticeDate = DateTime.MinValue;
-                }
-
-                return true;
+                word.PracticeStateNumber = 0;
+                word.PracticeDate = DateTime.MinValue;
             }
+
+            return true;
         }
     }
 }
