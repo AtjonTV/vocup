@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Vocup.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
@@ -15,7 +15,7 @@
       <Value Profile="(Default)">3</Value>
     </Setting>
     <Setting Name="StartScreen" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">2</Value>
     </Setting>
     <Setting Name="PracticePercentageUnpracticed" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">50</Value>
@@ -30,13 +30,13 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="AutoSave" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="PracticeGradeCulture" Type="System.String" Scope="User">
       <Value Profile="(Default)">de-DE</Value>
     </Setting>
     <Setting Name="DisableInternetServices" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="LastInternetConnection" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)" />

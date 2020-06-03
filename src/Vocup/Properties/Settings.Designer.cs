@@ -73,7 +73,7 @@ namespace Vocup.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
         public int StartScreen {
             get {
                 return ((int)(this["StartScreen"]));
@@ -133,7 +133,7 @@ namespace Vocup.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AutoSave {
             get {
                 return ((bool)(this["AutoSave"]));
@@ -157,7 +157,7 @@ namespace Vocup.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool DisableInternetServices {
             get {
                 return ((bool)(this["DisableInternetServices"]));
