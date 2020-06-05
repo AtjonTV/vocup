@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace Vocup.Controls
 {
     public partial class StatisticsPanel : UserControl
     {
-        private int _unpracticed;
-        private int _wronglyPracticed;
         private int _correctlyPracticed;
         private int _fullyPracticed;
+        private int _unpracticed;
+        private int _wronglyPracticed;
 
         public StatisticsPanel()
         {
@@ -27,6 +24,7 @@ namespace Vocup.Controls
                 RenewSum();
             }
         }
+
         public int WronglyPracticed
         {
             get => _wronglyPracticed;
@@ -37,6 +35,7 @@ namespace Vocup.Controls
                 RenewSum();
             }
         }
+
         public int CorrectlyPracticed
         {
             get => _correctlyPracticed;
@@ -47,6 +46,7 @@ namespace Vocup.Controls
                 RenewSum();
             }
         }
+
         public int FullyPracticed
         {
             get => _fullyPracticed;

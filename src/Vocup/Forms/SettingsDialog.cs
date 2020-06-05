@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using Vocup.Models;
 using Vocup.Properties;
@@ -22,7 +20,8 @@ namespace Vocup
 
         private void SettingsDialog_Load(object sender, EventArgs e)
         {
-            RbRecentFile.Checked = settings.StartScreen == (int)StartScreen.LastFile || settings.StartScreen == (int)StartScreen.AboutBox;
+            RbRecentFile.Checked = settings.StartScreen == (int) StartScreen.LastFile ||
+                                   settings.StartScreen == (int) StartScreen.AboutBox;
             CbAutoSave.Checked = settings.AutoSave;
 
             if (AppInfo.IsUwp)
@@ -46,9 +45,15 @@ namespace Vocup
 
             switch (Settings.Default.OverrideCulture)
             {
-                case "en-US": CbLanguage.SelectedIndex = 1; break;
-                case "de-DE": CbLanguage.SelectedIndex = 2; break;
-                default: CbLanguage.SelectedIndex = 0; break; // System language
+                case "en-US":
+                    CbLanguage.SelectedIndex = 1;
+                    break;
+                case "de-DE":
+                    CbLanguage.SelectedIndex = 2;
+                    break;
+                default:
+                    CbLanguage.SelectedIndex = 0;
+                    break; // System language
             }
 
             // Evaluation
@@ -56,8 +61,12 @@ namespace Vocup
             CbPracticeResult.Checked = settings.PracticeShowResultList;
             switch (settings.PracticeGradeCulture)
             {
-                case "de-CH": CbEvaluationSystem.SelectedIndex = 1; break;
-                default: CbEvaluationSystem.SelectedIndex = 0; break; // de-DE
+                case "de-CH":
+                    CbEvaluationSystem.SelectedIndex = 1;
+                    break;
+                default:
+                    CbEvaluationSystem.SelectedIndex = 0;
+                    break; // de-DE
             }
 
             // Partly correct configuration
@@ -86,7 +95,7 @@ namespace Vocup
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
-            settings.StartScreen = RbRecentFile.Checked ? (int)StartScreen.LastFile : (int)StartScreen.None;
+            settings.StartScreen = RbRecentFile.Checked ? (int) StartScreen.LastFile : (int) StartScreen.None;
             settings.AutoSave = CbAutoSave.Checked;
             settings.DisableInternetServices = CbDisableInternetServices.Checked;
 
@@ -98,23 +107,35 @@ namespace Vocup
             settings.VhfPath = TbVhfPath.Text;
             settings.VhrPath = TbVhrPath.Text;
 
-            string oldCulture = settings.OverrideCulture;
+            var oldCulture = settings.OverrideCulture;
             switch (CbLanguage.SelectedIndex)
             {
-                case 1: settings.OverrideCulture = "en-US"; break;
-                case 2: settings.OverrideCulture = "de-DE"; break;
-                default: settings.OverrideCulture = ""; break; // System language
+                case 1:
+                    settings.OverrideCulture = "en-US";
+                    break;
+                case 2:
+                    settings.OverrideCulture = "de-DE";
+                    break;
+                default:
+                    settings.OverrideCulture = "";
+                    break; // System language
             }
+
             if (settings.OverrideCulture != oldCulture)
-                MessageBox.Show(Messages.SettingsRestartRequired, Messages.SettingsRestartRequiredT, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(Messages.SettingsRestartRequired, Messages.SettingsRestartRequiredT,
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Evaluation
             settings.UserEvaluates = CbManualCheck.Checked;
             settings.PracticeShowResultList = CbPracticeResult.Checked;
             switch (CbEvaluationSystem.SelectedIndex)
             {
-                case 1: settings.PracticeGradeCulture = "de-CH"; break;
-                default: settings.PracticeGradeCulture = "de-DE"; break;
+                case 1:
+                    settings.PracticeGradeCulture = "de-CH";
+                    break;
+                default:
+                    settings.PracticeGradeCulture = "de-DE";
+                    break;
             }
 
             // Partly correct configuration
@@ -125,7 +146,8 @@ namespace Vocup
             settings.EvaluateTolerateNoSynonym = CbTolerateNoSynonym.Checked;
 
             // User interface
-            settings.PracticeInputBackColor = CbColoredTextfield.Checked ? Color.FromArgb(250, 250, 150) : SystemColors.Window;
+            settings.PracticeInputBackColor =
+                CbColoredTextfield.Checked ? Color.FromArgb(250, 250, 150) : SystemColors.Window;
             settings.PracticeSoundFeedback = CbAcousticFeedback.Checked;
             settings.PracticeFastContinue = CbSingleContinueButton.Checked;
 
@@ -142,7 +164,7 @@ namespace Vocup
 
         private void BtnResetStartScreen_Click(object sender, EventArgs e)
         {
-            settings.StartScreen = (int)StartScreen.AboutBox;
+            settings.StartScreen = (int) StartScreen.AboutBox;
             RbRecentFile.Checked = true;
         }
 
@@ -187,27 +209,21 @@ namespace Vocup
 
         private void BtnVhfPath_Click(object sender, EventArgs e)
         {
-            using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+            using (var fbd = new FolderBrowserDialog())
             {
                 fbd.SelectedPath = settings.VhfPath;
 
-                if (fbd.ShowDialog() == DialogResult.OK)
-                {
-                    TbVhfPath.Text = fbd.SelectedPath;
-                }
+                if (fbd.ShowDialog() == DialogResult.OK) TbVhfPath.Text = fbd.SelectedPath;
             }
         }
 
         private void BtnVhrPath_Click(object sender, EventArgs e)
         {
-            using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+            using (var fbd = new FolderBrowserDialog())
             {
                 fbd.SelectedPath = settings.VhrPath;
 
-                if (fbd.ShowDialog() == DialogResult.OK)
-                {
-                    TbVhrPath.Text = fbd.SelectedPath;
-                }
+                if (fbd.ShowDialog() == DialogResult.OK) TbVhrPath.Text = fbd.SelectedPath;
             }
         }
     }

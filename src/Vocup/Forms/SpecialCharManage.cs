@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,7 @@ namespace Vocup.Forms
     {
         private const string InvalidChars = "#=:\\/|<>*?\"";
         private readonly Color redBgColor = Color.FromArgb(255, 192, 203);
-        private string specialCharDir = AppInfo.SpecialCharDirectory;
+        private readonly string specialCharDir = AppInfo.SpecialCharDirectory;
 
         public SpecialCharManage()
         {
@@ -40,8 +39,8 @@ namespace Vocup.Forms
 
         private void TbLanguage_TbChars_TextChanged(object sender, EventArgs e)
         {
-            //Überprüfen, das Textfeld nicht erlaubte zeichen enthält
-            bool charsValid = !TbLanguage.Text.ContainsAny(InvalidChars);
+            //ï¿½berprï¿½fen, das Textfeld nicht erlaubte zeichen enthï¿½lt
+            var charsValid = !TbLanguage.Text.ContainsAny(InvalidChars);
             TbLanguage.BackColor = charsValid ? Color.Empty : redBgColor;
 
             if (!string.IsNullOrWhiteSpace(TbLanguage.Text) &&
@@ -58,19 +57,19 @@ namespace Vocup.Forms
             }
         }
 
-        //Sonderzeichen-Tabelle löschen
+        //Sonderzeichen-Tabelle lï¿½schen
         private void BtnDelete_Click(object sender, EventArgs e)
         {
             try
             {
-                string language = LanguageList.Items[LanguageList.SelectedIndex].ToString();
+                var language = LanguageList.Items[LanguageList.SelectedIndex].ToString();
 
-                //Datei mit den Sonderzeichen löschen
-                FileInfo info = new FileInfo(Path.Combine(specialCharDir, language + ".txt"));
+                //Datei mit den Sonderzeichen lï¿½schen
+                var info = new FileInfo(Path.Combine(specialCharDir, language + ".txt"));
                 if (info.Exists)
                     info.Delete();
 
-                //Sprache aus der Listbox löschen
+                //Sprache aus der Listbox lï¿½schen
                 LanguageList.Items.RemoveAt(LanguageList.SelectedIndex);
             }
             catch (Exception ex)
@@ -90,28 +89,29 @@ namespace Vocup.Forms
 
                 if (LanguageList.SelectedIndex == -1) // New item
                 {
-                    for (int i = 0; i < LanguageList.Items.Count; i++)
-                    {
+                    for (var i = 0; i < LanguageList.Items.Count; i++)
                         if (TbLanguage.Text == LanguageList.Items[i].ToString())
                         {
-                            MessageBox.Show(Messages.SpecialCharAlreadyExists, "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show(Messages.SpecialCharAlreadyExists, "", MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
                             return;
                         }
-                    }
 
                     LanguageList.Items.Add(TbLanguage.Text);
                 }
 
-                using (StreamWriter writer = new StreamWriter(Path.Combine(specialCharDir, TbLanguage.Text + ".txt")))
+                using (var writer = new StreamWriter(Path.Combine(specialCharDir, TbLanguage.Text + ".txt")))
                 {
                     TbChars.Text = TbChars.Text.Replace(" ", "");
                     writer.Write(string.Join(Environment.NewLine, TbChars.Text.ToCharArray()));
                 }
 
                 // Delete old file if language was changed
-                if (LanguageList.SelectedIndex != -1 && TbLanguage.Text != LanguageList.Items[LanguageList.SelectedIndex].ToString())
+                if (LanguageList.SelectedIndex != -1 &&
+                    TbLanguage.Text != LanguageList.Items[LanguageList.SelectedIndex].ToString())
                 {
-                    FileInfo info = new FileInfo(Path.Combine(specialCharDir, LanguageList.Items[LanguageList.SelectedIndex].ToString() + ".txt"));
+                    var info = new FileInfo(Path.Combine(specialCharDir,
+                        LanguageList.Items[LanguageList.SelectedIndex] + ".txt"));
                     info.Delete();
 
                     LanguageList.Items[LanguageList.SelectedIndex] = TbLanguage.Text;
@@ -153,14 +153,14 @@ namespace Vocup.Forms
         }
 
         /// <summary>
-        /// Clears the ListBox items and reloads all existing entries from disk.
+        ///     Clears the ListBox items and reloads all existing entries from disk.
         /// </summary>
         private void RefreshListbox()
         {
             LanguageList.BeginUpdate();
             LanguageList.Items.Clear();
 
-            DirectoryInfo directory_info = new DirectoryInfo(specialCharDir);
+            var directory_info = new DirectoryInfo(specialCharDir);
             if (!directory_info.Exists)
             {
                 LanguageList.EndUpdate();
@@ -179,18 +179,16 @@ namespace Vocup.Forms
         {
             try
             {
-                FileInfo info = new FileInfo(Path.Combine(specialCharDir, LanguageList.Items[LanguageList.SelectedIndex].ToString() + ".txt"));
+                var info = new FileInfo(Path.Combine(specialCharDir,
+                    LanguageList.Items[LanguageList.SelectedIndex] + ".txt"));
                 if (!info.Exists)
                     RefreshListbox();
 
-                using (StreamReader reader = new StreamReader(info.FullName, Encoding.UTF8))
+                using (var reader = new StreamReader(info.FullName, Encoding.UTF8))
                 {
-                    StringBuilder builder = new StringBuilder();
+                    var builder = new StringBuilder();
 
-                    while (!reader.EndOfStream)
-                    {
-                        builder.Append(reader.ReadLine().Trim().Substring(0, 1));
-                    }
+                    while (!reader.EndOfStream) builder.Append(reader.ReadLine().Trim().Substring(0, 1));
 
                     TbChars.Text = builder.ToString();
                 }

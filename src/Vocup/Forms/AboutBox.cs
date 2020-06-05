@@ -17,7 +17,7 @@ namespace Vocup.Forms
 
         private void AboutBox_Load(object sender, EventArgs e)
         {
-            string versionText = string.Format(LbVersion.Text, AppInfo.GetVersion(3));
+            var versionText = string.Format(LbVersion.Text, AppInfo.GetVersion(3));
             if (AppInfo.IsUwp)
                 versionText += " (UWP)";
             else if (AppInfo.IsMono)
@@ -51,10 +51,7 @@ namespace Vocup.Forms
 
         private void LwComponents_DoubleClick(object sender, EventArgs e)
         {
-            if (LwComponents.SelectedItems.Count > 0)
-            {
-                Process.Start(LwComponents.SelectedItems[0].SubItems[3].Text);
-            }
+            if (LwComponents.SelectedItems.Count > 0) Process.Start(LwComponents.SelectedItems[0].SubItems[3].Text);
         }
     }
 }

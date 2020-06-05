@@ -16,10 +16,10 @@ namespace Vocup.Models
 
         public VocabularyBookController(VocabularyBook book)
         {
-            ListView = new VocabularyListView()
+            ListView = new VocabularyListView
             {
                 Dock = DockStyle.Fill,
-                GridLines = Settings.Default.GridLines,
+                GridLines = Settings.Default.GridLines
             };
             ListView.ItemSelectionChanged += OnSelectionChanged;
             ListView.Control.DoubleClick += OnDoubleClick;
@@ -34,6 +34,7 @@ namespace Vocup.Models
         }
 
         public VocabularyListView ListView { get; }
+
         public IMainForm Parent
         {
             get => _parent;
@@ -45,16 +46,20 @@ namespace Vocup.Models
                 OnSelectionChanged(this, new EventArgs());
             }
         }
+
         public VocabularyBook VocabularyBook { get; }
-        IReadOnlyCollection<VocabularyWordController> WordControllers { get; }
+        private IReadOnlyCollection<VocabularyWordController> WordControllers { get; }
+
+        public void Dispose()
+        {
+            ((IDisposable) ListView).Dispose();
+        }
 
         public VocabularyWordController GetController(VocabularyWord word)
         {
-            foreach (VocabularyWordController controler in WordControllers)
-            {
+            foreach (var controler in WordControllers)
                 if (ReferenceEquals(controler.VocabularyWord, word))
                     return controler;
-            }
 
             throw new KeyNotFoundException("No controller could be found for the specified VocabularyWord.");
         }
@@ -67,14 +72,11 @@ namespace Vocup.Models
             Parent?.VocabularyBookUnsavedChanges(VocabularyBook.UnsavedChanges);
             Parent?.VocabularyBookName(VocabularyBook.Name);
 
-            if (VocabularyBook.UnsavedChanges && Settings.Default.AutoSave && !string.IsNullOrWhiteSpace(VocabularyBook.FilePath))
-            {
+            if (VocabularyBook.UnsavedChanges && Settings.Default.AutoSave &&
+                !string.IsNullOrWhiteSpace(VocabularyBook.FilePath))
                 if (VocabularyFile.WriteVhfFile(VocabularyBook.FilePath, VocabularyBook) &&
                     VocabularyFile.WriteVhrFile(VocabularyBook))
-                {
                     VocabularyBook.UnsavedChanges = false;
-                }
-            }
         }
 
         private void OnStatisticsChanged(object sender, EventArgs e)
@@ -104,21 +106,16 @@ namespace Vocup.Models
 
         private void AddItem(VocabularyWord item)
         {
-            VocabularyWordController controller = new VocabularyWordController(item);
+            var controller = new VocabularyWordController(item);
             wordControllers.Add(controller);
             ListView.Items.Add(controller.ListViewItem);
         }
 
         private void RemoveItem(VocabularyWord item)
         {
-            VocabularyWordController controller = GetController(item);
+            var controller = GetController(item);
             wordControllers.Remove(controller);
             ListView.Items.Remove(controller.ListViewItem);
-        }
-
-        public void Dispose()
-        {
-            ((IDisposable)ListView).Dispose();
         }
     }
 }

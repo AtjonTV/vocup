@@ -14,80 +14,66 @@ namespace Vocup.Util
 
         public PracticeResult GetResult(string[] inputs, string[] results)
         {
-            int missed = 0;
+            var missed = 0;
 
-            foreach (string result in results)
-            {
+            foreach (var result in results)
                 if (!inputs.Contains(result))
                     missed++;
-            }
 
             if (missed == 0)
                 return PracticeResult.Correct;
-            else if (missed < results.Length && TolerateNoSynonym)
+            if (missed < results.Length && TolerateNoSynonym)
                 return PracticeResult.PartlyCorrect;
 
-            string[] simplifiedInputs = inputs.Select(x => SimplifyText(x)).ToArray();
-            string[] simplifiedResults = results.Select(x => SimplifyText(x)).ToArray();
+            var simplifiedInputs = inputs.Select(x => SimplifyText(x)).ToArray();
+            var simplifiedResults = results.Select(x => SimplifyText(x)).ToArray();
 
             missed = 0;
 
-            foreach (string result in simplifiedResults)
-            {
+            foreach (var result in simplifiedResults)
                 if (!simplifiedInputs.Contains(result))
                     missed++;
-            }
 
             if (missed == 0)
                 return PracticeResult.PartlyCorrect;
 
-            int correctCount = 0;
+            var correctCount = 0;
 
-            foreach (string result in results)
-            {
+            foreach (var result in results)
                 if (result.ContainsAny(",;"))
                 {
-                    bool found = false;
+                    var found = false;
 
-                    foreach (string input in inputs)
-                    {
+                    foreach (var input in inputs)
                         if (GetPartitialResult(input, result) == PracticeResult.Correct)
                             found = true;
-                    }
 
                     if (found) correctCount++;
                 }
-            }
 
             if (correctCount == results.Length)
                 return PracticeResult.Correct;
-            else
-                return PracticeResult.Wrong;
+            return PracticeResult.Wrong;
         }
 
         private PracticeResult GetPartitialResult(string input, string result)
         {
-            string[] keywords = result.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var keywords = result.Split(new[] {',', ';'}, StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (string item in keywords)
-            {
+            foreach (var item in keywords)
                 if (!input.Contains(item))
                     return PracticeResult.Wrong;
-            }
 
             return PracticeResult.Correct;
         }
 
         /// <summary>
-        /// Returns the uppercase input simplified with all acitvated rules.
+        ///     Returns the uppercase input simplified with all acitvated rules.
         /// </summary>
         private string SimplifyText(string text)
         {
             // Remove white space
-            if (TolerateWhiteSpace)
-            {
-                text = text.Replace(" ", "");
-            }
+            if (TolerateWhiteSpace) text = text.Replace(" ", "");
 
             // Remove punctuation marks
             if (ToleratePunctuationMark)
@@ -142,7 +128,6 @@ namespace Vocup.Util
                 text = text.Replace("º", "");
                 text = text.Replace("¡", "");
                 text = text.Replace("¿", "");
-
             }
 
             // Remove articles

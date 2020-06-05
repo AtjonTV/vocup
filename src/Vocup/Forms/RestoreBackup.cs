@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 using System.Windows.Forms;
 using Vocup.Models;
 using Vocup.Properties;
@@ -13,9 +11,9 @@ namespace Vocup.Forms
 {
     public partial class RestoreBackup : Form
     {
-        private string path;
         private ZipArchive archive;
         private BackupMeta meta;
+        private readonly string path;
 
         public RestoreBackup(string path)
         {
@@ -32,16 +30,14 @@ namespace Vocup.Forms
 
             if (TryOpen(path, out archive) && BackupMeta.TryRead(archive, out meta))
             {
-                foreach (BackupMeta.BookMeta book in meta.Books)
+                foreach (var book in meta.Books)
                 {
-                    string fullName = BackupMeta.ExpandPath(book.VhfPath);
-                    ListBooks.Items.Add(CbAbsolutePath.Checked ? fullName : Path.GetFileNameWithoutExtension(fullName), true);
+                    var fullName = BackupMeta.ExpandPath(book.VhfPath);
+                    ListBooks.Items.Add(CbAbsolutePath.Checked ? fullName : Path.GetFileNameWithoutExtension(fullName),
+                        true);
                 }
 
-                foreach (string specialChar in meta.SpecialChars)
-                {
-                    ListSpecialChars.Items.Add(specialChar, true);
-                }
+                foreach (var specialChar in meta.SpecialChars) ListSpecialChars.Items.Add(specialChar, true);
             }
             else
             {
@@ -61,9 +57,9 @@ namespace Vocup.Forms
 
         private void CbAbsolutePath_CheckedChanged(object sender, EventArgs e)
         {
-            for (int i = 0; i < meta.Books.Count; i++)
+            for (var i = 0; i < meta.Books.Count; i++)
             {
-                string fullName = BackupMeta.ExpandPath(meta.Books[i].VhfPath);
+                var fullName = BackupMeta.ExpandPath(meta.Books[i].VhfPath);
                 ListBooks.Items[i] = CbAbsolutePath.Checked ? fullName : Path.GetFileNameWithoutExtension(fullName);
             }
         }
@@ -88,15 +84,16 @@ namespace Vocup.Forms
                 }
             }
 
-            for (int i = 0; i < meta.Books.Count; i++)
+            for (var i = 0; i < meta.Books.Count; i++)
             {
                 if (!ListBooks.GetItemChecked(i)) continue;
 
-                BackupMeta.BookMeta item = meta.Books[i];
+                var item = meta.Books[i];
                 var destination = new FileInfo(BackupMeta.ExpandPath(item.VhfPath));
-                RestoreResult result = Restore(archive, $"vhf\\{item.FileId}.vhf", destination, GetOverrideMode());
+                var result = Restore(archive, $"vhf\\{item.FileId}.vhf", destination, GetOverrideMode());
                 stats(result);
-                if (result == RestoreResult.Success && RbRestoreAssociatedResults.Checked && !string.IsNullOrWhiteSpace(item.VhrCode))
+                if (result == RestoreResult.Success && RbRestoreAssociatedResults.Checked &&
+                    !string.IsNullOrWhiteSpace(item.VhrCode))
                 {
                     var resultDestination = new FileInfo(Path.Combine(Settings.Default.VhrPath, item.VhrCode));
                     stats(Restore(archive, $"vhr\\{item.VhrCode}.vhr", resultDestination, GetOverrideMode()));
@@ -104,15 +101,13 @@ namespace Vocup.Forms
             }
 
             if (RbRestoreAllResults.Checked)
-            {
-                for (int i = 0; i < meta.Results.Count; i++)
+                for (var i = 0; i < meta.Results.Count; i++)
                 {
                     var destination = new FileInfo(Path.Combine(Settings.Default.VhrPath, meta.Results[i]));
                     stats(Restore(archive, "vhr\\" + meta.Results[i], destination, GetOverrideMode()));
                 }
-            }
 
-            for (int i = 0; i < meta.SpecialChars.Count; i++)
+            for (var i = 0; i < meta.SpecialChars.Count; i++)
             {
                 if (!ListSpecialChars.GetItemChecked(i)) continue;
 
@@ -120,7 +115,7 @@ namespace Vocup.Forms
                 stats(Restore(archive, "chars\\" + meta.SpecialChars[i], destination, GetOverrideMode()));
             }
 
-            MessageBox.Show(string.Format(Messages.VdpRestored, restored, skipped, failed), 
+            MessageBox.Show(string.Format(Messages.VdpRestored, restored, skipped, failed),
                 Messages.VdpRestoredT, MessageBoxButtons.OK, MessageBoxIcon.Information);
             Close();
         }
@@ -138,19 +133,21 @@ namespace Vocup.Forms
                 return OverrideMode.Older;
             if (RbReplaceNothing.Checked)
                 return OverrideMode.Never;
-            return (OverrideMode)(-1);
+            return (OverrideMode) (-1);
         }
 
         private bool TryOpen(string path, out ZipArchive archive)
         {
             try
             {
-                archive = new ZipArchive(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read), ZipArchiveMode.Read, leaveOpen: false);
+                archive = new ZipArchive(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read),
+                    ZipArchiveMode.Read, false);
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(Messages.VdpCorruptFile, ex), Messages.VdpCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Messages.VdpCorruptFile, ex), Messages.VdpCorruptFileT,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 archive = null;
                 return false;
             }
@@ -160,19 +157,21 @@ namespace Vocup.Forms
         {
             try
             {
-                ZipArchiveEntry entry = archive.GetEntry(path);
+                var entry = archive.GetEntry(path);
                 if (entry == null) return RestoreResult.Error;
 
                 if (destination.Exists &&
-                    (mode == OverrideMode.Never || (mode == OverrideMode.Older && destination.LastWriteTime > entry.LastWriteTime)))
+                    (mode == OverrideMode.Never ||
+                     mode == OverrideMode.Older && destination.LastWriteTime > entry.LastWriteTime))
                     return RestoreResult.Skipped;
 
                 destination.Directory.Create();
-                using (FileStream file = destination.Open(FileMode.Create, FileAccess.Write))
-                using (Stream source = entry.Open())
+                using (var file = destination.Open(FileMode.Create, FileAccess.Write))
+                using (var source = entry.Open())
                 {
                     source.CopyTo(file);
                 }
+
                 destination.LastWriteTimeUtc = entry.LastWriteTime.UtcDateTime;
                 return RestoreResult.Success;
             }

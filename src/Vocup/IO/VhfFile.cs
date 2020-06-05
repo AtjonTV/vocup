@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 using Vocup.Models;
 using Vocup.Properties;
+using Vocup.Util;
 
 namespace Vocup.IO.Internal
 {
@@ -17,41 +19,48 @@ namespace Vocup.IO.Internal
             }
             catch (NotSupportedException)
             {
-                MessageBox.Show(Messages.VhfMustUpdate, Messages.VhfMustUpdateT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Messages.VhfMustUpdate, Messages.VhfMustUpdateT, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
                 return false;
             }
             catch (FormatException)
             {
-                MessageBox.Show(Messages.VhfCorruptFile, Messages.VhfCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Messages.VhfCorruptFile, Messages.VhfCorruptFileT, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
                 return false;
             }
-            catch (System.Security.Cryptography.CryptographicException)
+            catch (CryptographicException)
             {
-                MessageBox.Show(Messages.VhfCorruptFile, Messages.VhfCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Messages.VhfCorruptFile, Messages.VhfCorruptFileT, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
                 return false;
             }
 
-            using (StringReader reader = new StringReader(plaintext))
+            using (var reader = new StringReader(plaintext))
             {
-                string version = reader.ReadLine();
-                string vhrCode = reader.ReadLine();
-                string motherTongue = reader.ReadLine();
-                string foreignLang = reader.ReadLine();
+                var version = reader.ReadLine();
+                var vhrCode = reader.ReadLine();
+                var motherTongue = reader.ReadLine();
+                var foreignLang = reader.ReadLine();
 
-                if (string.IsNullOrWhiteSpace(version) || !Version.TryParse(version, out Version versionObj))
+                if (string.IsNullOrWhiteSpace(version) || !Version.TryParse(version, out var versionObj))
                 {
-                    MessageBox.Show(Messages.VhfInvalidVersion, Messages.VhfCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Messages.VhfInvalidVersion, Messages.VhfCorruptFileT, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                     return false;
                 }
-                else if (versionObj.CompareTo(Util.AppInfo.FileVersion) == 1)
+
+                if (versionObj.CompareTo(AppInfo.FileVersion) == 1)
                 {
-                    MessageBox.Show(Messages.VhfMustUpdate, Messages.VhfMustUpdateT, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(Messages.VhfMustUpdate, Messages.VhfMustUpdateT, MessageBoxButtons.OK,
+                        MessageBoxIcon.Exclamation);
                     return false;
                 }
 
                 if (vhrCode == null)
                 {
-                    MessageBox.Show(Messages.VhfInvalidVhrCode, Messages.VhfCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Messages.VhfInvalidVhrCode, Messages.VhfCorruptFileT, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                     return false;
                 }
 
@@ -62,7 +71,8 @@ namespace Vocup.IO.Internal
                     string.IsNullOrWhiteSpace(foreignLang) ||
                     motherTongue == foreignLang)
                 {
-                    MessageBox.Show(Messages.VhfInvalidLanguages, Messages.VhfCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Messages.VhfInvalidLanguages, Messages.VhfCorruptFileT, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                     return false;
                 }
 
@@ -71,15 +81,17 @@ namespace Vocup.IO.Internal
 
                 while (true)
                 {
-                    string line = reader.ReadLine();
+                    var line = reader.ReadLine();
                     if (line == null) break;
-                    string[] columns = line.Split('#');
+                    var columns = line.Split('#');
                     if (columns.Length != 3)
                     {
-                        MessageBox.Show(Messages.VhfInvalidRow, Messages.VhfCorruptFileT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Messages.VhfInvalidRow, Messages.VhfCorruptFileT, MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
                         return false;
                     }
-                    VocabularyWord word = new VocabularyWord()
+
+                    var word = new VocabularyWord
                     {
                         Owner = book,
                         MotherTongue = columns[0],
@@ -97,14 +109,14 @@ namespace Vocup.IO.Internal
         {
             string raw;
 
-            using (StringWriter writer = new StringWriter())
+            using (var writer = new StringWriter())
             {
                 writer.WriteLine("1.0");
                 writer.WriteLine(book.VhrCode);
                 writer.WriteLine(book.MotherTongue);
                 writer.WriteLine(book.ForeignLang);
 
-                foreach (VocabularyWord word in book.Words)
+                foreach (var word in book.Words)
                 {
                     writer.Write(word.MotherTongue);
                     writer.Write('#');
@@ -122,7 +134,8 @@ namespace Vocup.IO.Internal
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(Messages.VocupFileWriteErrorEx, ex), Messages.VocupFileWriteErrorT, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Messages.VocupFileWriteErrorEx, ex), Messages.VocupFileWriteErrorT,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 

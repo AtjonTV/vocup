@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Vocup.IO.Internal;
 using Vocup.Models;
 
 namespace Vocup.IO
 {
     /// <summary>
-    /// Provides static methods for reading und writing vocabulary files.
+    ///     Provides static methods for reading und writing vocabulary files.
     /// </summary>
     public static class VocabularyFile
     {

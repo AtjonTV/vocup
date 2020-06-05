@@ -1,18 +1,18 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using Vocup.Properties;
+using Vocup.Util;
 
 namespace Vocup.Forms
 {
     public partial class SpecialCharKeyboard : Form
     {
-        private TextBox textBox;
         private bool _dialogEnabled;
+        private TextBox textBox;
 
         public SpecialCharKeyboard()
         {
@@ -27,13 +27,22 @@ namespace Vocup.Forms
         public bool DialogEnabled
         {
             get => _dialogEnabled;
-            set { if (value != _dialogEnabled) { _dialogEnabled = value; OnDialogEnabledChanged(); } }
+            set
+            {
+                if (value != _dialogEnabled)
+                {
+                    _dialogEnabled = value;
+                    OnDialogEnabledChanged();
+                }
+            }
         }
+
         protected virtual void OnDialogEnabledChanged()
         {
             DialogEnabledChanged?.Invoke(this, EventArgs.Empty);
             Visible = _dialogEnabled && (textBox?.Enabled ?? false);
         }
+
         public event EventHandler DialogEnabledChanged;
 
         public void Initialize(Form owner, Button trigger)
@@ -58,18 +67,16 @@ namespace Vocup.Forms
 
         private void Form_Load(object sender, EventArgs e)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(Util.AppInfo.SpecialCharDirectory);
+            var dirInfo = new DirectoryInfo(AppInfo.SpecialCharDirectory);
 
             if (dirInfo.Exists)
-            {
-                foreach (FileInfo info in dirInfo.GetFiles("*.txt"))
-                {
+                foreach (var info in dirInfo.GetFiles("*.txt"))
                     try
                     {
-                        using (StreamReader reader = new StreamReader(info.FullName, Encoding.UTF8))
+                        using (var reader = new StreamReader(info.FullName, Encoding.UTF8))
                         {
-                            string name = Path.GetFileNameWithoutExtension(info.FullName);
-                            TabPage page = new TabPage
+                            var name = Path.GetFileNameWithoutExtension(info.FullName);
+                            var page = new TabPage
                             {
                                 Name = "TpCustom" + name,
                                 Tag = "Custom" + name,
@@ -79,27 +86,27 @@ namespace Vocup.Forms
                                 Font = new Font("Arial", 9.75f)
                             };
 
-                            int index = 0;
-                            int itemsPerLine = 12;
-                            Point offset = new Point(8, 6);
-                            Point space = new Point(6, 6);
-                            Size size = new Size(25, 25);
+                            var index = 0;
+                            var itemsPerLine = 12;
+                            var offset = new Point(8, 6);
+                            var space = new Point(6, 6);
+                            var size = new Size(25, 25);
 
                             while (!reader.EndOfStream)
                             {
-                                string line = reader.ReadLine();
+                                var line = reader.ReadLine();
 
                                 if (line.Length > 0)
                                     line = line.Substring(0, 1);
                                 else
                                     continue;
 
-                                int x = offset.X + (size.Width + space.X) * (index % itemsPerLine);
-                                int y = offset.Y + (size.Height + space.Y) * (index / itemsPerLine);
+                                var x = offset.X + (size.Width + space.X) * (index % itemsPerLine);
+                                var y = offset.Y + (size.Height + space.Y) * (index / itemsPerLine);
 
-                                Button button = new Button
+                                var button = new Button
                                 {
-                                    Name = page.Name + "_Char_" + (ushort)line[0],
+                                    Name = page.Name + "_Char_" + (ushort) line[0],
                                     Text = line,
                                     UseVisualStyleBackColor = true,
                                     Size = size,
@@ -117,27 +124,24 @@ namespace Vocup.Forms
                     catch
                     {
                         MessageBox.Show(
-                            string.Format(Messages.SpecialCharCorruptedFile, Path.GetFileNameWithoutExtension(info.FullName), info.FullName),
+                            string.Format(Messages.SpecialCharCorruptedFile,
+                                Path.GetFileNameWithoutExtension(info.FullName), info.FullName),
                             Messages.SpecialCharCorruptedFileT,
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Error);
                     }
-                }
-            }
 
             // Try to open recent tab
             foreach (TabPage page in TcMain.TabPages)
-            {
                 if (page.Tag.ToString().Equals(Settings.Default.SpecialCharTab, StringComparison.OrdinalIgnoreCase))
                     TcMain.SelectTab(page);
-            }
         }
 
         private void Button_Click(object sender, EventArgs e)
         {
             if (textBox != null)
             {
-                Button button = (Button)sender;
+                var button = (Button) sender;
                 if (textBox.Enabled && !textBox.ReadOnly)
                     textBox.Text += button.Text;
                 textBox.SelectionStart = textBox.TextLength;

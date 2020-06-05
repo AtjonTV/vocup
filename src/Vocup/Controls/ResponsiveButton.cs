@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -46,15 +45,16 @@ namespace Vocup.Controls
         {
             if (_baseImage != null)
             {
-                Size newSize = _imageSize.Multiply(scalingFactor).Rectify().Round();
+                var newSize = _imageSize.Multiply(scalingFactor).Rectify().Round();
                 Image newImage = new Bitmap(newSize.Width, newSize.Height);
-                Image oldImage = Image;
-                using (Graphics g = Graphics.FromImage(newImage))
+                var oldImage = Image;
+                using (var g = Graphics.FromImage(newImage))
                 {
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.DrawImage(_baseImage, 0, 0, newSize.Width, newSize.Height);
                 }
+
                 Image = newImage;
                 oldImage?.Dispose();
             }

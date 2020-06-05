@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using Vocup.Models;
 using Vocup.Properties;
@@ -12,9 +10,9 @@ namespace Vocup.Forms
     public partial class VocabularyBookSettings : Form
     {
         private const string InvalidChars = "#=:\\/|<>*?\"";
+        private readonly VocabularyBook book;
         private readonly Color redBgColor = Color.FromArgb(255, 192, 203);
         private readonly SpecialCharKeyboard specialCharDialog;
-        private readonly VocabularyBook book;
 
         private VocabularyBookSettings()
         {
@@ -50,14 +48,14 @@ namespace Vocup.Forms
 
         private void TextBox_Enter(object sender, EventArgs e)
         {
-            specialCharDialog.RegisterTextBox((TextBox)sender);
+            specialCharDialog.RegisterTextBox((TextBox) sender);
         }
 
         private void TextBox_TextChanged(object sender, EventArgs e)
         {
-            bool mValid = !TbMotherTongue.Text.ContainsAny(InvalidChars);
+            var mValid = !TbMotherTongue.Text.ContainsAny(InvalidChars);
             TbMotherTongue.BackColor = mValid ? Color.White : redBgColor;
-            bool fValid = !TbForeignLang.Text.ContainsAny(InvalidChars);
+            var fValid = !TbForeignLang.Text.ContainsAny(InvalidChars);
             TbForeignLang.BackColor = fValid ? Color.White : redBgColor;
 
             if (mValid && fValid &&
@@ -79,15 +77,13 @@ namespace Vocup.Forms
         {
             book.MotherTongue = TbMotherTongue.Text;
             book.ForeignLang = TbForeignLang.Text;
-            book.PracticeMode = RbModeAskForeignLang.Checked ? PracticeMode.AskForForeignLang : PracticeMode.AskForMotherTongue;
+            book.PracticeMode = RbModeAskForeignLang.Checked
+                ? PracticeMode.AskForForeignLang
+                : PracticeMode.AskForMotherTongue;
 
             if (CbResetResults.Checked)
-            {
-                foreach (VocabularyWord word in book.Words)
-                {
+                foreach (var word in book.Words)
                     word.PracticeStateNumber = 0;
-                }
-            }
         }
     }
 }

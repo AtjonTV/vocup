@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Vocup.Properties;
 using Vocup.Util;
 
 namespace Vocup.Models
@@ -10,11 +11,11 @@ namespace Vocup.Models
     public class VocabularyBook : INotifyPropertyChanged
     {
         private string _filePath;
-        private string _vhrCode;
-        private string _motherTongue;
         private string _foreignLang;
+        private string _motherTongue;
         private PracticeMode _practiceMode = PracticeMode.AskForForeignLang;
         private bool _unsafedChanges;
+        private string _vhrCode;
 
         public VocabularyBook()
         {
@@ -28,33 +29,81 @@ namespace Vocup.Models
         public string FilePath
         {
             get => _filePath;
-            set { if (_filePath != value) { _filePath = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_filePath != value)
+                {
+                    _filePath = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public string VhrCode
         {
             get => _vhrCode;
-            set { if (_vhrCode != value) { _vhrCode = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_vhrCode != value)
+                {
+                    _vhrCode = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public string MotherTongue
         {
             get => _motherTongue;
-            set { if (_motherTongue != value) { _motherTongue = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_motherTongue != value)
+                {
+                    _motherTongue = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public string ForeignLang
         {
             get => _foreignLang;
-            set { if (_foreignLang != value) { _foreignLang = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_foreignLang != value)
+                {
+                    _foreignLang = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public PracticeMode PracticeMode
         {
             get => _practiceMode;
-            set { if (_practiceMode != value) { _practiceMode = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_practiceMode != value)
+                {
+                    _practiceMode = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public bool UnsavedChanges
         {
             get => _unsafedChanges;
-            set { if (_unsafedChanges != value) { _unsafedChanges = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_unsafedChanges != value)
+                {
+                    _unsafedChanges = value;
+                    OnPropertyChanged();
+                }
+            }
         }
+
         public string Name => string.IsNullOrWhiteSpace(_filePath) ? null : Path.GetFileNameWithoutExtension(_filePath);
         public ReactiveCollection<VocabularyWord> Words { get; }
         public VocabularyBookStatistics Statistics { get; }
@@ -84,7 +133,7 @@ namespace Vocup.Models
         }
 
         /// <summary>
-        /// Activates raising events by setting <see cref="Notifies"/> to true.
+        ///     Activates raising events by setting <see cref="Notifies" /> to true.
         /// </summary>
         public void Notify()
         {
@@ -98,25 +147,25 @@ namespace Vocup.Models
             int bigLetter1 = 'A', bigLetter2 = 'Z';
             int smallLetter1 = 'a', smallLetter2 = 'z';
 
-            Random random = new Random(); // No need for RNGCryptoServiceProvider here because this is not security critical.
-            char[] code = new char[24];
+            var random =
+                new Random(); // No need for RNGCryptoServiceProvider here because this is not security critical.
+            var code = new char[24];
 
             do
             {
-                int i = 0;
+                var i = 0;
                 while (i < code.Length)
                 {
-                    int character = random.Next(number1, smallLetter2);
-                    if ((character >= number1 && character <= number2) ||
-                        (character >= bigLetter1 && character <= bigLetter2) ||
-                        (character >= smallLetter1 && character <= smallLetter2))
+                    var character = random.Next(number1, smallLetter2);
+                    if (character >= number1 && character <= number2 ||
+                        character >= bigLetter1 && character <= bigLetter2 ||
+                        character >= smallLetter1 && character <= smallLetter2)
                     {
-                        code[i] = (char)character;
+                        code[i] = (char) character;
                         i++;
                     }
                 }
-
-            } while (File.Exists(Path.Combine(Properties.Settings.Default.VhrPath, code + ".vhr")));
+            } while (File.Exists(Path.Combine(Settings.Default.VhrPath, code + ".vhr")));
 
             VhrCode = new string(code);
         }
